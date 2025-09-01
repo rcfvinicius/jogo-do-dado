@@ -6,6 +6,7 @@
     <title>Jogo do dado</title>
     <link rel="stylesheet" href="./styles.css"/>
     <script src="./script.js" defer></script>
+    <link rel="icon" href="./images/dado-3.svg" type="image/x-icon">
 </head>
 <body>
     <header>
@@ -17,14 +18,23 @@
 
     <main>
         <div id="gameboard">
+            <div>Jogadores</div><div>Pontuação</div><div>Total</div>
+
             <div>
-                Jogadores
+                Romão
             </div>
             <div>
-                Pontuação
+                <button type="button">x</button>
+                <button type="button">x</button>
+                <button type="button">x</button>
             </div>
             <div>
-                Total
+                4
+            </div>
+        
+            <div id="add-player-row">
+                <input type="text" style="display: none;" placeholder="Nome do jogador"/>
+                <button type="button">+</button>
             </div>
         </div>
     </main>
