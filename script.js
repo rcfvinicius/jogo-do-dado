@@ -1,6 +1,7 @@
 document.querySelector('#change-theme').addEventListener('click', toggleTheme);
 const root = document.querySelector(':root');
 setTheme(getTheme() === 'dark');
+const history = getHistory();
 
 const addInput = document.querySelector('#add-player-row input');
 const players = new Array();
@@ -15,15 +16,16 @@ function handleEditRequest(event) {
     if (event instanceof KeyboardEvent) if (event.key !== 'Enter') return;
     if (!isAdding) {
         addInput.style = 'display:block;';
+        document.querySelector('#add-player-row button').style = 'display:block;';
     }
     else {
         if (validateName(addInput.value)) {
             addInput.style = 'display:none;';
             addPlayer(addInput.value);
             addInput.value = '';
+            document.querySelector('#add-player-row button').style = 'display:none;';
         } else {
-            showToast('Nome inválido!');
-            return;
+            return showToast('Nome inválido!');
         }
     }
 
@@ -33,6 +35,7 @@ function handleEditRequest(event) {
 function cancelAddPlayer() {
     addInput.style = 'display:none;';
     addInput.value = '';
+    document.querySelector('#add-player-row button').style = 'display:none;';
     isAdding = false;
 }
 
@@ -46,21 +49,76 @@ function addPlayer(name) {
     }
 
     const id = generateID();
-
     players.push({
         id,
         name,
         throws: []
     });
 
-    //updateView();
+    updateView('add');
 }
 
-function updateView() {
-    throw new Error('NOT_IMPLEMENTED_FUNCTION');
+function removePlayer(event) {
+    const id = event.target.dataset['id']
+    const i = players.findIndex(player => player.id === id);
+
+    players.splice(i, 1);
+    updateView('remove', id);
+}
+
+function updateView(action, id = null) {
+    if (action === 'add') {
+        const player = players.at(-1);
+        for (let i = 0; i < 3; i++) {
+            const div = document.createElement('div');
+            if (i === 0) {
+                div.innerHTML = player.name + `<button data-id="${player.id}" type="button">R</button>`;
+                div.querySelector(`button[data-id="${player.id}"]`).addEventListener('click', removePlayer);
+            }
+            if (i === 1) {
+                div.innerHTML = '<button type="button">x</button><button type="button">x</button><button type="button">x</button>';
+            }
+            if (i === 2) div.innerText = player.throws.reduce((acc, crr) => acc + crr, 0);
+
+            div.dataset['id'] = player.id;
+            document.querySelector('#gameboard').insertBefore(div, document.querySelector('#add-player-row'));
+        }
+        return;
+    }
+
+    if (action === 'remove') return document.querySelectorAll(`#gameboard > [data-id="${id}"]`).forEach(element => element.remove());
+
+
+}
+
+function getHistory() {
+    const history = localStorage.getItem('history');
+
+    if (history === null) return new Array();
+    return JSON.parse(history);
+}
+
+function saveMatch() {
+    history.push({
+        players,
+        date: getDate()
+    });
+
+    localStorage.setItem('history', JSON.stringify(history));
+}
+
+function getDate() {
+    const today = new Date();
+
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+
+    return `${day}/${month}/${year}`;
 }
 
 function generateID() {
+    return String(lastID++);
     return 'id-' + lastID++;
 }
 
