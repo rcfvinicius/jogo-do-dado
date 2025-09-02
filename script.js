@@ -7,16 +7,17 @@ const players = new Array();
 let lastID = 0;
 let isAdding = false;
 
-document.querySelector('#add-player-row button').addEventListener('click', handleEditRequest);
+document.querySelector('#add-player-row button:last-child').addEventListener('click', handleEditRequest); //evento ao clicar para adicionar um jogador
+document.querySelector('#add-player-row button').addEventListener('click', cancelAddPlayer); //evento ao cancelar a adição
 addInput.addEventListener('keydown', handleEditRequest);
 
-function handleEditRequest(event){
-    if(event instanceof KeyboardEvent) if(event.key !== 'Enter') return;
-    if(!isAdding) {
+function handleEditRequest(event) {
+    if (event instanceof KeyboardEvent) if (event.key !== 'Enter') return;
+    if (!isAdding) {
         addInput.style = 'display:block;';
     }
     else {
-        if(validateName(addInput.value)){
+        if (validateName(addInput.value)) {
             addInput.style = 'display:none;';
             addPlayer(addInput.value);
             addInput.value = '';
@@ -29,31 +30,37 @@ function handleEditRequest(event){
     isAdding = !isAdding;
 }
 
-function validateName(name){
+function cancelAddPlayer() {
+    addInput.style = 'display:none;';
+    addInput.value = '';
+    isAdding = false;
+}
+
+function validateName(name) {
     return name.trim().length > 0;
 }
 
-function addPlayer(name){
-    if(players.some(player => player.name.toLowerCase() === name.toLowerCase())){
+function addPlayer(name) {
+    if (players.some(player => player.name.toLowerCase() === name.toLowerCase())) {
         return showToast('Jogador já adicionado!');
     }
 
     const id = generateID();
- 
+
     players.push({
         id,
         name,
-        throws:[]
+        throws: []
     });
 
     //updateView();
 }
 
-function updateView(){
+function updateView() {
     throw new Error('NOT_IMPLEMENTED_FUNCTION');
 }
 
-function generateID(){
+function generateID() {
     return 'id-' + lastID++;
 }
 
@@ -64,25 +71,25 @@ function generateID(){
     return newID;
 } */
 
-function showToast(message){
+function showToast(message) {
     alert(message);
 }
 
 
 //#region Manipulação de tema
-function getTheme(){
+function getTheme() {
     const theme = window.localStorage.getItem('theme');
 
-    if(theme !== null) return theme;
+    if (theme !== null) return theme;
     return 'light';
 }
 
-function setTheme(dark){
+function setTheme(dark) {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
     root.style = `color-scheme:${dark ? 'dark' : 'light'}`;
 }
 
-function toggleTheme(){
+function toggleTheme() {
     const theme = getTheme();
     setTheme(theme !== 'dark');
 }
