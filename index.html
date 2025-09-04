@@ -16,11 +16,16 @@
         <button id="change-theme" type="button">
             F
         </button>
+        <button type="button"
+            id="salvar">save</button><!-- FIXME: colocar esse botão no add-player-row. Só estará visível quando o jogo acabar -->
     </header>
 
     <main>
         <div id="gameboard">
-            <div>Jogadores</div>
+            <div>
+                <span>Jogadores</span>
+                <button type="button" id="unshift-btn">F</button>
+            </div>
             <div>Pontuação</div>
             <div>Total</div>
 
@@ -29,6 +34,21 @@
                 <button type="button" style="display: none;">X</button>
                 <button type="button">+</button>
             </div>
+        </div>
+
+        <div id="history">
+            <ul>
+                <!-- <li>
+                    <p>Perdedor</p>
+                    <p>Pontuação</p>
+                    <p>Data</p>
+                </li>
+                <li>
+                    <p>Perdedor</p>
+                    <p>Pontuação</p>
+                    <p>Data</p>
+                </li> -->
+            </ul>
         </div>
     </main>
 </body>

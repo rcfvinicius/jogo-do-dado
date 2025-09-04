@@ -7,7 +7,9 @@ const addInput = document.querySelector('#add-player-row input');
 const players = new Array();
 let lastID = 0;
 let isAdding = false;
+setPlayers();
 
+document.querySelector('#unshift-btn').addEventListener('click', unshiftPlayers); //evento ao clicar para colocar o último jogador em primeiro
 document.querySelector('#add-player-row button:last-child').addEventListener('click', handleEditRequest); //evento ao clicar para adicionar um jogador
 document.querySelector('#add-player-row button').addEventListener('click', cancelAddPlayer); //evento ao cancelar a adição
 addInput.addEventListener('keydown', handleEditRequest);
@@ -67,28 +69,54 @@ function removePlayer(event) {
 }
 
 function updateView(action, id = null) {
-    if (action === 'add') {
+    if (action === 'add') { //adiciona o novo jogador ao final da lista
         const player = players.at(-1);
         for (let i = 0; i < 3; i++) {
-            const div = document.createElement('div');
-            if (i === 0) {
-                div.innerHTML = player.name + `<button data-id="${player.id}" type="button">R</button>`;
-                div.querySelector(`button[data-id="${player.id}"]`).addEventListener('click', removePlayer);
-            }
-            if (i === 1) {
-                div.innerHTML = '<button type="button">x</button><button type="button">x</button><button type="button">x</button>';
-            }
-            if (i === 2) div.innerText = player.throws.reduce((acc, crr) => acc + crr, 0);
-
-            div.dataset['id'] = player.id;
-            document.querySelector('#gameboard').insertBefore(div, document.querySelector('#add-player-row'));
+            const cell = setCell(i, player);
+            document.querySelector('#gameboard').insertBefore(cell, document.querySelector('#add-player-row'));
         }
         return;
     }
 
     if (action === 'remove') return document.querySelectorAll(`#gameboard > [data-id="${id}"]`).forEach(element => element.remove());
 
+    if (action === 'unshift') {
+        const player = players[0];
+        updateView('remove', player.id);
 
+        for (let i = 0; i < 3; i++) {
+            const cell = setCell(i, player);
+            if (players.length === 1) document.querySelector('#gameboard').insertBefore(cell, document.querySelector('#add-player-row'));
+            else {
+                const nextPlayerId = players[1].id;
+                document.querySelector('#gameboard').insertBefore(cell, document.querySelector(`#gameboard > [data-id="${nextPlayerId}"]`));
+            }
+        }
+
+
+    }
+}
+
+function setCell(i, player) {
+    const div = document.createElement('div');
+    if (i === 0) {
+        div.innerHTML = player.name + `<button data-id="${player.id}" type="button">R</button>`;
+        div.querySelector(`button[data-id="${player.id}"]`).addEventListener('click', removePlayer);
+    }
+    if (i === 1) {
+        div.innerHTML = '<button type="button">x</button><button type="button">x</button><button type="button">x</button>';
+    }
+    if (i === 2) div.innerText = player.throws.reduce((acc, crr) => acc + crr, 0);
+
+    div.dataset['id'] = player.id;
+    return div;
+}
+
+function setPlayers() {
+    if (history.length === 0) return;
+    const lastPlayers = history.at(-1).players;
+
+    for (const p of lastPlayers) addPlayer(p.name);
 }
 
 function getHistory() {
@@ -98,9 +126,16 @@ function getHistory() {
     return JSON.parse(history);
 }
 
+function showHistory() {
+    if (history.length === 0) return;
+    document.querySelector('#history')//TODO: exibir histórico
+}
+
+document.querySelector('#salvar').addEventListener('click', saveMatch);//FIXME: remover
+
 function saveMatch() {
     history.push({
-        players,
+        players,//vai salvar o id também, mas que não será utilizado
         date: getDate()
     });
 
@@ -115,6 +150,12 @@ function getDate() {
     const year = today.getFullYear();
 
     return `${day}/${month}/${year}`;
+}
+
+function unshiftPlayers() {
+    if (players.length === 0) return;
+    players.unshift(players.pop());
+    updateView('unshift');
 }
 
 function generateID() {

@@ -106,5 +106,42 @@ main {
   }
 }
 
+#history ul {
+  height: 650px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-x: auto;
+  /* font-family: Roboto, Segoe UI, GeezaPro, "DejaVu Serif", "sans-serif", -apple-system, BlinkMacSystemFont; */
+  font-size: 13px;
+  overflow-y: hidden;
+  height: auto;
+  --border: 1px solid #e0e0e0;
+  border-left: var(--border);
+  border-right: var(--border);
+  border-bottom: var(--border);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+
+  & li {
+    height: 35px;
+    white-space: nowrap;
+    min-width: 100%;
+    border-bottom: 1px solid #e0e0e0;
+    /* background-color: light-dark(black, white); */
+  }
+
+  & p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+    margin: 0;
+    width: 150px;
+    padding: 6px 15px 6px 15px;
+    height: 100%;
+  }
+}
+
 /* implementação antiga
 @media (prefers-color-scheme: dark) {} */
