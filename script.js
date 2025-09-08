@@ -103,10 +103,18 @@ function setCell(i, player) {
         div.innerHTML = player.name + `<button data-id="${player.id}" type="button">R</button>`;
         div.querySelector(`button[data-id="${player.id}"]`).addEventListener('click', removePlayer);
     }
-    if (i === 1) {
-        div.innerHTML = '<button type="button">x</button><button type="button">x</button><button type="button">x</button>';
+    else if (i === 1) {
+        for(let i = 0; i < 3; i++){
+            const button = document.createElement('button');
+            button.setAttribute('type', 'button');
+            button.classList.add('score-button');
+            button.innerText = 'X';
+
+            div.appendChild(button);
+        }
+        div.classList.add('score-container');
     }
-    if (i === 2) div.innerText = player.throws.reduce((acc, crr) => acc + crr, 0);
+    else if (i === 2) div.innerText = player.throws.reduce((acc, crr) => acc + crr, 0);
 
     div.dataset['id'] = player.id;
     return div;
