@@ -22,9 +22,9 @@
 
     <main>
         <div id="gameboard">
-            <div>
+            <div id="players-header">
                 <span>Jogadores</span>
-                <button type="button" id="unshift-btn">F</button>
+                <button type="button" id="unshift-btn"></button>
             </div>
             <div>Pontuação</div>
             <div>Total</div>
@@ -51,6 +51,18 @@
             </ul>
         </div>
     </main>
+    <div id="select-score" style=" display: none;">
+        <button type="button" id="close-select-score"></button>
+        <!-- <div id="fragment"></div> -->
+        <div id="dices">
+            <button type="button" data-dice="1"><img src="./images/dado-1.svg" /></button>
+            <button type="button" data-dice="2"><img src="./images/dado-2.svg" /></button>
+            <button type="button" data-dice="3"><img src="./images/dado-3.svg" /></button>
+            <button type="button" data-dice="4"><img src="./images/dado-4.svg" /></button>
+            <button type="button" data-dice="5"><img src="./images/dado-5.svg" /></button>
+            <button type="button" data-dice="6"><img src="./images/dado-6.svg" /></button>
+        </div>
+    </div>
 </body>
 
 </html>

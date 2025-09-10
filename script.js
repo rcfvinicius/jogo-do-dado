@@ -12,10 +12,11 @@ setPlayers();
 document.querySelector('#unshift-btn').addEventListener('click', unshiftPlayers); //evento ao clicar para colocar o último jogador em primeiro
 document.querySelector('#add-player-row button:last-child').addEventListener('click', handleEditRequest); //evento ao clicar para adicionar um jogador
 document.querySelector('#add-player-row button').addEventListener('click', cancelAddPlayer); //evento ao cancelar a adição
+document.querySelector('#close-select-score').addEventListener('click', () => document.querySelector('#select-score').style = 'display:none');
 addInput.addEventListener('keydown', handleEditRequest);
 
 function handleEditRequest(event) {
-    if (event instanceof KeyboardEvent) if (event.key !== 'Enter') return;
+    if (event instanceof KeyboardEvent && event.key !== 'Enter') return;
     if (!isAdding) {
         addInput.style = 'display:block;';
         document.querySelector('#add-player-row button').style = 'display:block;';
@@ -54,7 +55,7 @@ function addPlayer(name) {
     players.push({
         id,
         name,
-        throws: []
+        throws: [0, 0, 0]
     });
 
     updateView('add');
@@ -65,6 +66,7 @@ function removePlayer(event) {
     const i = players.findIndex(player => player.id === id);
 
     players.splice(i, 1);
+    checkThrows();
     updateView('remove', id);
 }
 
@@ -91,30 +93,47 @@ function updateView(action, id = null) {
                 const nextPlayerId = players[1].id;
                 document.querySelector('#gameboard').insertBefore(cell, document.querySelector(`#gameboard > [data-id="${nextPlayerId}"]`));
             }
+            checkThrows();
         }
+        return;
+    }
 
-
+    if (action === 'score') {
+        const score = players.find(p => p.id === id).throws.reduce((acc, crr) => acc + crr, 0);
+        document.querySelectorAll(`#gameboard > [data-id="${id}"]`)[2].innerText = String(score);
     }
 }
+
 
 function setCell(i, player) {
     const div = document.createElement('div');
     if (i === 0) {
-        div.innerHTML = player.name + `<button data-id="${player.id}" type="button">R</button>`;
+        div.innerHTML = `<span>${player.name}</span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
+        div.classList.add('player-name-container');
         div.querySelector(`button[data-id="${player.id}"]`).addEventListener('click', removePlayer);
     }
     else if (i === 1) {
-        for(let i = 0; i < 3; i++){
+        for (let j = 0; j < 3; j++) {
             const button = document.createElement('button');
             button.setAttribute('type', 'button');
             button.classList.add('score-button');
-            button.innerText = 'X';
+            button.dataset['id'] = player.id;
+            button.dataset['pos'] = j;
+            // if (players[0].id !== player.id || j > 0) button.style = 'display:none';
+            if (j > 0) button.style = 'display:none';
+            if (player.throws[j] > 0) {
+                button.innerHTML = `<img src="./images/dado-${player.throws[j]}.svg"/>`;
+            }
 
+            button.addEventListener('click', setSelectScorePosition);
             div.appendChild(button);
         }
         div.classList.add('score-container');
     }
-    else if (i === 2) div.innerText = player.throws.reduce((acc, crr) => acc + crr, 0);
+    else if (i === 2) {
+        div.innerText = player.throws.reduce((acc, crr) => acc + crr, 0);
+        div.classList.add('total-container')
+    }
 
     div.dataset['id'] = player.id;
     return div;
@@ -143,7 +162,7 @@ document.querySelector('#salvar').addEventListener('click', saveMatch);//FIXME: 
 
 function saveMatch() {
     history.push({
-        players,//vai salvar o id também, mas que não será utilizado
+        players, //vai salvar o id também, mas não será utilizado
         date: getDate()
     });
 
@@ -168,7 +187,6 @@ function unshiftPlayers() {
 
 function generateID() {
     return String(lastID++);
-    return 'id-' + lastID++;
 }
 
 /* function generateID(){
@@ -181,6 +199,43 @@ function generateID() {
 function showToast(message) {
     alert(message);
 }
+
+document.querySelectorAll('#dices > button').forEach(button => button.addEventListener('click', selectScore));
+
+function selectScore(e) {
+    const value = e.currentTarget.dataset['dice'];
+    const playerId = lastSelectedScoreButton.dataset['id'];
+    const img = lastSelectedScoreButton.querySelector('img');
+    if (img) lastSelectedScoreButton.querySelector('img').src = `./images/dado-${value}.svg`;
+    else lastSelectedScoreButton.innerHTML = `<img src="./images/dado-${value}.svg"/>`;
+
+    document.getElementById('select-score').style = 'display:none;';
+    players.find(p => p.id === playerId).throws[parseInt(lastSelectedScoreButton.dataset['pos'])] = parseInt(value);
+
+    checkThrows();
+    updateView('score', playerId);
+}
+
+function checkThrows() {
+    //verifica se todos os jogadores jogaram a rodada.
+    if (!players.some(p => p.throws[0] === 0)) document.querySelectorAll('.score-button[data-pos="1"]').forEach(element => element.style = '');
+    if (!players.some(p => p.throws[1] === 0)) document.querySelectorAll('.score-button[data-pos="2"]').forEach(element => element.style = '');
+}
+
+let lastSelectedScoreButton; //último botão da pontuação escolhido
+function setSelectScorePosition(e) {
+    if (e !== undefined) {
+        lastSelectedScoreButton = e.target.parentNode.classList.contains('score-button') ? e.target.parentNode : e.target;
+    }
+
+    const top = lastSelectedScoreButton.offsetTop + 180 - 50; //header + margin
+    const left = lastSelectedScoreButton.offsetLeft + lastSelectedScoreButton.offsetWidth + (document.body.scrollWidth - document.querySelector('#gameboard').offsetWidth) / 2;
+
+    document.getElementById('select-score').style = `top:${String(top)}px;left:${String(left)}px;position:absolute;`;
+}
+
+window.addEventListener('resize', () => setSelectScorePosition());
+
 
 
 //#region Manipulação de tema
