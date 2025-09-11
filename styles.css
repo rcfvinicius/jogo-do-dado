@@ -55,8 +55,13 @@ header {
 
 #change-theme {
   position: absolute;
-  top: 30px;
-  right: 10px;
+  top: 23px;
+  right: 15px;
+  height: 35px;
+
+  & img {
+    height: 100%;
+  }
 }
 
 main {
@@ -89,10 +94,9 @@ main {
     display: flex;
     align-items: center;
     text-transform: uppercase;
-    outline: 1px solid white;
+    border-bottom: 1px solid white;
   }
 }
-
 
 #add-player-row {
   grid-column: span 3;
@@ -101,15 +105,37 @@ main {
     width: 10%;
     height: 100%;
     cursor: pointer;
+    margin-top: 5px;
+
+    & img {
+      height: 70%;
+    }
+  }
+
+  & button:last-child img {
+    transform: rotate(45deg);
   }
 
   & input {
     height: 100%;
     font-size: 30px;
+    width: 80%;
+    background: none;
+    border: none;
+    outline: none;
+    padding-left: 6px;
+    text-transform: uppercase;
+    color: white;
+
+    &::placeholder {
+      text-transform: none;
+      color: rgb(192, 192, 192);
+    }
   }
 }
 
-#score-header, #total-header {
+#score-header,
+#total-header {
   justify-content: center;
 }
 
@@ -134,7 +160,6 @@ button[type="button"] {
   transition-timing-function: ease-out;
 }
 
-
 .remove-button {
   background-image: url("./images/trash-solid-full.svg") !important;
   width: 20px;
@@ -146,7 +171,8 @@ button[type="button"] {
 }
 
 /* aplica regras para a primeira coluna */
-#players-header, .player-name-container{
+#players-header,
+.player-name-container {
   display: flex;
   justify-content: space-between;
   padding: 0 5px 0 5px;
@@ -175,6 +201,10 @@ button[type="button"] {
   background-image: url("./images/question-solid-full.svg") !important;
 }
 
+:where(#dices button, .score-button:has(img)):hover {
+  transform: scale(1.1);
+}
+
 #gameboard > .score-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -192,15 +222,13 @@ button[type="button"] {
   width: 166px;
   position: relative;
   border-radius: 20px;
-  /* box-shadow: 7px 5px 0px light-dark(black, rgb(177, 177, 177)); */
-  border: 4px solid rgb(177, 177, 177); /* light-dark(black, rgb(177, 177, 177)); */
+  border: 4px solid rgb(177, 177, 177);
 
   & #dices {
     row-gap: 10px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
-    overflow: hidden;
   }
 
   /* & #fragment {
@@ -264,8 +292,9 @@ button[type="button"] {
 
 #game-over {
   background-color: rgba(41, 41, 41, 0.404);
+  color: white;
   position: fixed;
-  top:0;
+  top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
@@ -275,8 +304,7 @@ button[type="button"] {
   font-family: "Montserrat";
 
   & > div {
-    position: absolute;
-    background-color: red;
+    background-color: rgb(104, 4, 4);
     width: 100%;
     height: 200px;
     display: flex;
@@ -288,24 +316,72 @@ button[type="button"] {
   }
 }
 
-#game-over > div > div {
-  margin-top: -10px;
+#game-over > div > div:first-child {
   opacity: 1;
   animation-name: loser-title-animation;
-  animation-duration: 2000ms;
-  animation-timing-function: linear;
+  animation-duration: 500ms;
+  animation-timing-function: ease-in;
+  animation-delay: 300ms;
+  animation-fill-mode: forwards;
+  transform: skew(0deg, -15deg);
+  font-size: 25px;
+  opacity: 0;
 
-  & h1, h4 {
+  & h1 {
+    text-shadow: 3px 3px 0px rgb(177, 177, 177);
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  & h4 {
+    /* text-shadow: 2px 2px 0px rgb(177, 177, 177); */
+    color: rgb(221, 221, 221);
     margin: 0;
   }
 }
 
-@keyframes loser-title-animation {
+#game-over > div > div:last-child {
+  margin-top: 150px;
+  display: flex;
+  align-items: center;
+  column-gap: 10px;
+  font-size: 10px;
+  opacity: 0;
+  animation-name: game-saved;
+  animation-timing-function: ease-out;
+  animation-duration: 300ms;
+  animation-delay: 3s;
+  animation-fill-mode: forwards;
+
+  & img {
+    height: 25px;
+  }
+}
+
+@keyframes game-saved {
   from {
     opacity: 0;
+    transform: translateY(20px);
   }
+
   to {
     opacity: 1;
+  }
+}
+
+@keyframes loser-title-animation {
+  0% {
+    opacity: 0;
+    transform: skew(0deg, 30deg);
+  }
+
+  70% {
+    transform: skew(0deg, -15deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: skew(0deg, -15deg);
   }
 }
 

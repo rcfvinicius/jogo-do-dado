@@ -14,10 +14,8 @@
     <header>
         <h1 id="title">Jogo do dado</h1>
         <button id="change-theme" type="button">
-            F
+            <img />
         </button>
-        <button type="button"
-            id="salvar">save</button><!-- FIXME: colocar esse botão no add-player-row. Só estará visível quando o jogo acabar -->
     </header>
 
     <main>
@@ -30,9 +28,13 @@
             <div id="total-header">Total</div>
 
             <div id="add-player-row">
-                <input type="text" style="display: none;" placeholder="Nome do jogador" />
-                <button type="button" style="display: none;">X</button>
-                <button type="button">+</button>
+                <input type="text" style="display: none;" placeholder="Digite o nome do jogador..." />
+                <button type="button" style="display: none;">
+                    <img src="./images/xmark-solid-full.svg" />
+                </button>
+                <button type="button">
+                    <img src="./images/xmark-solid-full.svg" />
+                </button>
             </div>
         </div>
 
@@ -64,11 +66,15 @@
         </div>
     </div>
 
-    <div id="game-over">
+    <div id="game-over" style="display: none;">
         <div>
             <div>
-                <h4>Perdedor</h4>
-                <h1>romão</h1>
+                <h1></h1>
+                <h4>vai tirar o lixo...</h4>
+            </div>
+            <div>
+                <img src="./images/circle-info-solid-full.svg" />
+                <h2>O jogo foi salvo no histórico.</h2>
             </div>
         </div>
     </div>
