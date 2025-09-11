@@ -158,8 +158,6 @@ function showHistory() {
     document.querySelector('#history')//TODO: exibir histórico
 }
 
-document.querySelector('#salvar').addEventListener('click', saveMatch);//FIXME: remover
-
 function saveMatch() {
     history.push({
         players, //vai salvar o id também, mas não será utilizado
@@ -220,9 +218,47 @@ function checkThrows() {
     //verifica se todos os jogadores jogaram a rodada.
     if (!players.some(p => p.throws[0] === 0)) document.querySelectorAll('.score-button[data-pos="1"]').forEach(element => element.style = '');
     if (!players.some(p => p.throws[1] === 0)) document.querySelectorAll('.score-button[data-pos="2"]').forEach(element => element.style = '');
-    if (!players.some(p => p.throws[2] === 0)) {
-       alert('jogo finalizado');//FIXME:
+    if (!players.some(p => p.throws[2] === 0)) finishGame();
+}
+
+function finishGame() {
+    if (players.length === 0) return;
+    let min = 19;
+    players.forEach(player => {
+        player.total = player.throws.reduce((acc, crr) => acc + crr, 0);
+        if (player.total < min) min = player.total;
+    });
+
+    const losers = checkTie(min);
+    showLosersBanner(losers);
+    saveMatch();
+}
+
+function checkTie(min) {
+    return players.filter(player => player.total === min);
+}
+
+function showLosersBanner(losers) {
+    if (losers.length === 1) {
+        document.querySelector('#game-over div div h1').innerText = losers[0].name;
+        document.querySelector('#game-over').style = '';
+        return;
     }
+
+    //caso seja empate
+    window.setTimeout(() => {
+        document.querySelector('#game-over div div').style = `
+            animation-name:none;
+            opacity:1;
+            transform:skew(0);
+        `;
+
+        document.querySelector('#game-over div div h1').innerText = 'empate';
+        document.querySelector('#game-over div div h4').innerText = losers.map(player => player.name).join(', ');
+    }, 300);
+
+    document.querySelector('#game-over div').style = 'background-color:rgb(157 176 0);';
+    document.querySelector('#game-over').style = '';
 }
 
 let lastSelectedScoreButton; //último botão da pontuação escolhido
@@ -252,6 +288,9 @@ function getTheme() {
 function setTheme(dark) {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
     root.style = `color-scheme:${dark ? 'dark' : 'light'}`;
+
+    if (dark) document.querySelector('#change-theme img').src = './images/sun-solid-full.svg';
+    else document.querySelector('#change-theme img').src = './images/moon-solid-full.svg';
 }
 
 function toggleTheme() {
