@@ -220,6 +220,9 @@ function checkThrows() {
     //verifica se todos os jogadores jogaram a rodada.
     if (!players.some(p => p.throws[0] === 0)) document.querySelectorAll('.score-button[data-pos="1"]').forEach(element => element.style = '');
     if (!players.some(p => p.throws[1] === 0)) document.querySelectorAll('.score-button[data-pos="2"]').forEach(element => element.style = '');
+    if (!players.some(p => p.throws[2] === 0)) {
+       alert('jogo finalizado');//FIXME:
+    }
 }
 
 let lastSelectedScoreButton; //último botão da pontuação escolhido

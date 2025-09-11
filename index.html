@@ -12,7 +12,7 @@
 
 <body>
     <header>
-        <h1 class="txt">Jogo do dado</h1>
+        <h1 id="title">Jogo do dado</h1>
         <button id="change-theme" type="button">
             F
         </button>
@@ -26,8 +26,8 @@
                 <span>Jogadores</span>
                 <button type="button" id="unshift-btn"></button>
             </div>
-            <div>Pontuação</div>
-            <div>Total</div>
+            <div id="score-header">Pontuação</div>
+            <div id="total-header">Total</div>
 
             <div id="add-player-row">
                 <input type="text" style="display: none;" placeholder="Nome do jogador" />
@@ -61,6 +61,15 @@
             <button type="button" data-dice="4"><img src="./images/dado-4.svg" /></button>
             <button type="button" data-dice="5"><img src="./images/dado-5.svg" /></button>
             <button type="button" data-dice="6"><img src="./images/dado-6.svg" /></button>
+        </div>
+    </div>
+
+    <div id="game-over">
+        <div>
+            <div>
+                <h4>Perdedor</h4>
+                <h1>romão</h1>
+            </div>
         </div>
     </div>
 </body>

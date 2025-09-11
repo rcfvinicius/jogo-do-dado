@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: dark;
-
+  /* implementação antiga @media (prefers-color-scheme: dark) {} */
   --txt-light: black;
   --txt-dark: white;
   --bg-light: white;
@@ -33,7 +33,7 @@ body {
   overflow-x: hidden;
 }
 
-h1 {
+#title {
   font-family: "Libertinus", sans-serif;
   text-transform: uppercase;
   margin: 0;
@@ -69,7 +69,7 @@ main {
 #gameboard {
   color: white;
   background-color: #729b79;
-  height: 442px;
+  min-height: 442px;
   width: 592px;
   margin-top: 100px;
   border-radius: 20px;
@@ -80,8 +80,9 @@ main {
   padding: 20px;
   font-weight: 600;
   display: grid;
-  grid-template-columns: 2fr 3fr 1fr;
-  grid-template-rows: repeat(auto-fit, 50px);
+  grid-template-columns: 25fr 28fr 12fr;
+  /* grid-template-rows: 50px; */
+  grid-auto-rows: 50px;
   position: relative;
 
   & > div {
@@ -91,6 +92,7 @@ main {
     outline: 1px solid white;
   }
 }
+
 
 #add-player-row {
   grid-column: span 3;
@@ -105,6 +107,10 @@ main {
     height: 100%;
     font-size: 30px;
   }
+}
+
+#score-header, #total-header {
+  justify-content: center;
 }
 
 button[type="button"] {
@@ -128,13 +134,6 @@ button[type="button"] {
   transition-timing-function: ease-out;
 }
 
-#players-header {
-  padding: 0 5px 0 5px;
-}
-
-#players-header:hover #unshift-btn {
-  opacity: 1;
-}
 
 .remove-button {
   background-image: url("./images/trash-solid-full.svg") !important;
@@ -146,10 +145,22 @@ button[type="button"] {
   transition-timing-function: ease-out;
 }
 
-.player-name-container {
+/* aplica regras para a primeira coluna */
+#players-header, .player-name-container{
   display: flex;
   justify-content: space-between;
   padding: 0 5px 0 5px;
+
+  & span {
+    max-width: 190px; /* tamanho do texto */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+#players-header:hover #unshift-btn {
+  opacity: 1;
 }
 
 .player-name-container:hover .remove-button {
@@ -251,5 +262,65 @@ button[type="button"] {
   }
 }
 
-/* implementação antiga
-@media (prefers-color-scheme: dark) {} */
+#game-over {
+  background-color: rgba(41, 41, 41, 0.404);
+  position: fixed;
+  top:0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Montserrat";
+
+  & > div {
+    position: absolute;
+    background-color: red;
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    animation-name: loser-bg;
+    animation-duration: 400ms;
+    animation-timing-function: cubic-bezier(0.92, 0.01, 0.34, 1.37);
+  }
+}
+
+#game-over > div > div {
+  margin-top: -10px;
+  opacity: 1;
+  animation-name: loser-title-animation;
+  animation-duration: 2000ms;
+  animation-timing-function: linear;
+
+  & h1, h4 {
+    margin: 0;
+  }
+}
+
+@keyframes loser-title-animation {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes loser-bg {
+  0% {
+    width: 0;
+    height: 20px;
+  }
+
+  80% {
+    width: 100%;
+    height: 20px;
+  }
+
+  100% {
+    height: 200px;
+  }
+}
