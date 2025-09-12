@@ -270,7 +270,13 @@ function setSelectScorePosition(e) {
     const top = lastSelectedScoreButton.offsetTop + 180 - 50; //header + margin
     const left = lastSelectedScoreButton.offsetLeft + lastSelectedScoreButton.offsetWidth + (document.body.scrollWidth - document.querySelector('#gameboard').offsetWidth) / 2;
 
-    document.getElementById('select-score').style = `top:${String(top)}px;left:${String(left)}px;position:absolute;`;
+    const selectScoreElement = document.getElementById('select-score');
+    selectScoreElement.style.top = `${String(top)}px`;
+    selectScoreElement.style.left = `${String(left)}px`;
+    if (e !== undefined) {
+        selectScoreElement.style.position = `absolute`;
+        selectScoreElement.style.display = `block`;
+    }
 }
 
 window.addEventListener('resize', () => setSelectScorePosition());
