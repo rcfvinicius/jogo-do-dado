@@ -358,6 +358,24 @@ button[type="button"] {
   }
 }
 
+#check-results-button {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-family: "Montserrat";
+  padding: 10px;
+  border-radius: 8px;
+  color: light-dark(black, white);
+  border: 1px solid light-dark(black, white);
+  transition-property: color, background-color;
+  transition-duration: 200ms;
+
+  &:hover {
+    color: black;
+    background-color: light-dark(transparent, white);
+  }
+}
+
 @keyframes game-saved {
   from {
     opacity: 0;
