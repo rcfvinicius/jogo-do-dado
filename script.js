@@ -4,12 +4,12 @@ setTheme(getTheme() === 'dark');
 const history = getHistory();
 
 const addInput = document.querySelector('#add-player-row input');
-const players = new Array();
+let players = new Array();
 let lastID = 0;
 let isAdding = false;
 setPlayers();
 
-document.querySelector('#unshift-btn').addEventListener('click', unshiftPlayers); //evento ao clicar para colocar o último jogador em primeiro
+document.querySelector('#unshift-btn').addEventListener('click', unshiftPlayers); //evento ao clicar para colocar o primeiro jogador em último.
 document.querySelector('#add-player-row button:last-child').addEventListener('click', handleEditRequest); //evento ao clicar para adicionar um jogador
 document.querySelector('#add-player-row button').addEventListener('click', cancelAddPlayer); //evento ao cancelar a adição
 document.querySelector('#close-select-score').addEventListener('click', () => document.querySelector('#select-score').style = 'display:none');
@@ -47,7 +47,8 @@ function validateName(name) {
 }
 
 function addPlayer(name) {
-    if (players.some(player => player.name.toLowerCase() === name.toLowerCase())) {
+    name = name.toLowerCase();
+    if (players.some(player => player.name === name)) {
         return showToast('Jogador já adicionado!');
     }
 
@@ -83,16 +84,12 @@ function updateView(action, id = null) {
     if (action === 'remove') return document.querySelectorAll(`#gameboard > [data-id="${id}"]`).forEach(element => element.remove());
 
     if (action === 'unshift') {
-        const player = players[0];
+        const player = players.at(-1);
         updateView('remove', player.id);
 
         for (let i = 0; i < 3; i++) {
             const cell = setCell(i, player);
-            if (players.length === 1) document.querySelector('#gameboard').insertBefore(cell, document.querySelector('#add-player-row'));
-            else {
-                const nextPlayerId = players[1].id;
-                document.querySelector('#gameboard').insertBefore(cell, document.querySelector(`#gameboard > [data-id="${nextPlayerId}"]`));
-            }
+            document.querySelector('#gameboard').insertBefore(cell, document.querySelector('#add-player-row'));
             checkThrows();
         }
         return;
@@ -179,7 +176,11 @@ function getDate() {
 
 function unshiftPlayers() {
     if (players.length === 0) return;
-    players.unshift(players.pop());
+    //players.unshift(players.pop());
+    const firstPlayer = players[0];
+    players = players.filter(player => player.id !== firstPlayer.id);
+    players.push(firstPlayer);
+
     updateView('unshift');
 }
 
