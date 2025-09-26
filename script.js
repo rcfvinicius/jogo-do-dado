@@ -227,6 +227,9 @@ function finishGame() {
     let min = 19;
     players.forEach(player => {
         player.total = player.throws.reduce((acc, crr) => acc + crr, 0);
+        if (player.total === 3) player.total = 18;
+        else if (player.total === 18) player.total = 3;
+
         if (player.total < min) min = player.total;
     });
 
