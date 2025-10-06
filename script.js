@@ -196,7 +196,18 @@ function generateID() {
 } */
 
 function showToast(message) {
-    alert(message);
+    const toastArea = document.querySelector('#toast-area');
+    const toast = document.createElement('div');
+    toast.classList.add('toast');
+    const text = document.createElement('h3');
+    text.innerText = message;
+    toast.appendChild(text);
+    
+    const toastElements = toastArea.querySelectorAll('.toast');
+    if(toastElements.length > 0) toastArea.insertBefore(toast, toastElements[0]);
+    else toastArea.appendChild(toast);
+
+    window.setTimeout(toast.remove.bind(toast), 5000);
 }
 
 document.querySelectorAll('#dices > button').forEach(button => button.addEventListener('click', selectScore));
@@ -285,7 +296,7 @@ function setSelectScorePosition(e) {
 
 window.addEventListener('resize', () => setSelectScorePosition());
 
-
+document.querySelector('#version').innerText = 'v' + root.dataset.version;
 
 //#region Manipulação de tema
 function getTheme() {
