@@ -480,3 +480,8 @@ button[type="button"] {
     opacity: 1;
   }
 }
+
+.player-wins {
+  font-size: x-small;
+  color: rgb(226, 226, 226)
+}

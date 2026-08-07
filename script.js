@@ -2,7 +2,7 @@ document.querySelector('#change-theme').addEventListener('click', toggleTheme);
 const root = document.querySelector(':root');
 setTheme(getTheme() === 'dark');
 const history = getHistory();
-
+const userWins = getUserWinHistory();
 const addInput = document.querySelector('#add-player-row input');
 let players = new Array();
 let lastID = 0;
@@ -105,7 +105,8 @@ function updateView(action, id = null) {
 function setCell(i, player) {
     const div = document.createElement('div');
     if (i === 0) {
-        div.innerHTML = `<span>${player.name}</span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
+        const playerWins = userWins[player.name] ? userWins[player.name] : 0;
+        div.innerHTML = `<span>${player.name}<span>${playerWins ? ' <span class=\"player-wins\">(' + playerWins + ' vitórias)</span>': ''}</span></span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
         div.classList.add('player-name-container');
         div.querySelector(`button[data-id="${player.id}"]`).addEventListener('click', removePlayer);
     }
@@ -292,6 +293,34 @@ function setSelectScorePosition(e) {
         selectScoreElement.style.position = `absolute`;
         selectScoreElement.style.display = `block`;
     }
+}
+
+function getUserWinHistory() {
+    /** @type {Map<string, number>} */
+    const winHistory = new Map()
+    history.forEach((match) => {
+        let winningPlayers = [];
+        match.players.forEach((player) => {
+            if (winningPlayers.length === 0) winningPlayers = [player]
+            else {
+                winningPlayers.forEach((winningPlayer) => {
+                    if (player.total === winningPlayer.total) {
+                        winningPlayers.push(player); // caso tenham 2 vencedores, contar os dois
+                    } else if (player.total > winningPlayer.total) {
+                        winningPlayers = [player]; // caso tenha apenas 1 vencedor, resete
+                    }
+                });
+            }
+        })
+        if (winningPlayers.length === match.players.length) {
+            winningPlayers = []; // empate
+        }
+        winningPlayers.forEach((winningPlayer) => {
+            const value = (winHistory.get(winningPlayer.name) ? winHistory.get(winningPlayer.name) : 0) + 1;
+            winHistory.set(winningPlayer.name, value);
+        })
+    });
+    return Object.fromEntries(winHistory);
 }
 
 window.addEventListener('resize', () => setSelectScorePosition());
