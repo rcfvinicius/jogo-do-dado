@@ -106,7 +106,7 @@ function setCell(i, player) {
     const div = document.createElement('div');
     if (i === 0) {
         const playerWins = userWins[player.name] ? userWins[player.name] : 0;
-        div.innerHTML = `<span>${player.name}<span>${playerWins ? ' <span class=\"player-wins\">(' + playerWins + ' vitórias)</span>': ''}</span></span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
+        div.innerHTML = `<span>${player.name}<span>${playerWins ? ' <span class=\"player-wins\">(' + playerWins + ' derrotas)</span>': ''}</span></span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
         div.classList.add('player-name-container');
         div.querySelector(`button[data-id="${player.id}"]`).addEventListener('click', removePlayer);
     }
@@ -297,30 +297,26 @@ function setSelectScorePosition(e) {
 
 function getUserWinHistory() {
     /** @type {Map<string, number>} */
-    const winHistory = new Map()
+    const winHistoryMap = new Map();
     history.forEach((match) => {
-        let winningPlayers = [];
+        let losingPlayers = [];
         match.players.forEach((player) => {
-            if (winningPlayers.length === 0) winningPlayers = [player]
-            else {
-                winningPlayers.forEach((winningPlayer) => {
-                    if (player.total === winningPlayer.total) {
-                        winningPlayers.push(player); // caso tenham 2 vencedores, contar os dois
-                    } else if (player.total > winningPlayer.total) {
-                        winningPlayers = [player]; // caso tenha apenas 1 vencedor, resete
-                    }
-                });
-            }
-        })
-        if (winningPlayers.length === match.players.length) {
-            winningPlayers = []; // empate
-        }
-        winningPlayers.forEach((winningPlayer) => {
-            const value = (winHistory.get(winningPlayer.name) ? winHistory.get(winningPlayer.name) : 0) + 1;
-            winHistory.set(winningPlayer.name, value);
-        })
+            if (losingPlayers.length === 0) return losingPlayers = [player]; // adicionar o primeiro caso e ir pro próximo loop.
+            
+            const winningPlayer = losingPlayers.at(0) // nunca winningPlayer e player vão ser o mesmo, então é seguro.
+            
+            if (player.total > winningPlayer.total) return;
+            if (player.total === winningPlayer.total) return losingPlayers.push(player); // caso total for igual ao do jogador vencedor, contar os dois (ou mais já que é push).
+            losingPlayers = [player]; // caso total for maior que o vencedor atual, substitua o vencedor.
+        });
+
+        if (losingPlayers.length === match.players.length) return; // empate total, não contar jogadores vencedores.
+
+        losingPlayers.forEach((winningPlayer) => {
+            winHistoryMap.set(winningPlayer.name, winHistoryMap.get(winningPlayer.name) + 1 || 1);
+        });
     });
-    return Object.fromEntries(winHistory);
+    return Object.fromEntries(winHistoryMap);
 }
 
 window.addEventListener('resize', () => setSelectScorePosition());
