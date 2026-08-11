@@ -1,4 +1,5 @@
 document.querySelector('#change-theme').addEventListener('click', toggleTheme);
+document.querySelector('#toggle-sidebar-btn').addEventListener('click', toggleSidebar);
 const root = document.querySelector(':root');
 setTheme(getTheme() === 'dark');
 const history = getHistory();
@@ -8,6 +9,7 @@ let players = new Array();
 let lastID = 0;
 let isAdding = false;
 setPlayers();
+loadSidebar();
 
 document.querySelector('#unshift-btn').addEventListener('click', unshiftPlayers); //evento ao clicar para colocar o primeiro jogador em último.
 document.querySelector('#add-player-row button:last-child').addEventListener('click', handleEditRequest); //evento ao clicar para adicionar um jogador
@@ -317,6 +319,103 @@ function getUserWinHistory() {
         });
     });
     return Object.fromEntries(winHistoryMap);
+}
+
+// #region Sidebar
+let currentFilter;
+
+function loadSidebar(items){
+    if(!items) items = history;
+    let xxx = [{
+            "players":[
+                {"id":"0","name":"fff","throws":[2,6,4],"total":12},
+                {"id":"1","name":"323f","throws":[1,5,4],"total":10}
+            ],
+            "date":"08/08/2026"
+        }];
+
+    if(!items.length) document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.setAttribute('disabled',''));
+    else document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.removeAttribute('disabled'));
+
+    const ul = document.querySelector('.rcf-sidebar-list');
+    ul.innerHTML = '';
+    items.forEach((current, i)=>{
+        const li = document.createElement('li');
+        li.style.animationDelay = i*3*(i>20?0:1)+'0ms';
+        if(i > 300) li.classList.add('remove-li-animation');
+        li.innerHTML = `
+            <p>
+                Jogo #${i + 1}<br />
+                Perdedor: ${'romaozinho'}<br />
+                Pontuação: 4<br />
+            </p>
+        `
+
+        ul.appendChild(li);
+    })
+}
+
+function onSelectFilter(filter = null) {
+    console.log(filter)
+    document.querySelector('.rcf-sidebar ul').scrollTop = 0;
+    document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.classList.remove('filter-active'));
+    if (filter === currentFilter) {
+        currentFilter = null;
+        loadSidebar();
+        return;
+    }
+    document.querySelector(`.rcf-sidebar-filters li:nth-child(${filter}) .filter-btn`).classList.add('filter-active')
+    currentFilter = filter;
+
+    let items;
+    if(filter === 1){
+        const listUsers = new Map();
+        history.forEach((current) => {
+            const loser = getLoser(current);
+            if(!loser) return;
+
+            if(!listUsers.has(loser.name)) return listUsers.set(loser.name, 1);
+            listUsers.set(loser.name, listUsers.get(loser.name) + 1);
+        });
+
+        while(listUsers.size) {
+
+        }
+
+    }
+
+    loadSidebar(items);
+}
+
+function getLoser(listItem){
+    let min = 20;
+    let loser;
+
+    for(const player of listItem.players){
+        if (player.total === min) return null;
+        if (player.total < min) {
+            min = player.total;
+            loser = player;
+        }
+    }
+
+    return loser;
+}
+
+function toggleSidebar(action = 'close') {
+    //if (!action) this.openNotifications = !this.openNotifications;
+    if (action === 'open') {
+        document.querySelector('.rcf-sidebar ul').scrollTop = 0;
+        document.querySelector('.rcf-sidebar-backdrop').style.display = 'block';
+        document.querySelector('.rcf-sidebar').classList.add('rcf-sidebar-open');
+        document.querySelector(':root').classList.add('rcf-overflow-hidden');
+
+    }
+    if (action === 'close') {
+        document.querySelector('.rcf-sidebar-backdrop').style.display = 'none';
+        document.querySelector('.rcf-sidebar').classList.remove('rcf-sidebar-open');
+        document.querySelector(':root').classList.remove('rcf-overflow-hidden');
+    }
 }
 
 window.addEventListener('resize', () => setSelectScorePosition());

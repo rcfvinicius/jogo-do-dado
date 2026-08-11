@@ -12,6 +12,7 @@
 
 <body>
     <header>
+        <button type="button" id="toggle-sidebar-btn">TODO:</button>
         <h1 id="title">Jogo do dado</h1>
         <button id="change-theme" type="button">
             <img />
@@ -37,21 +38,6 @@
                     <img src="./images/xmark-solid-full.svg" />
                 </button>
             </div>
-        </div>
-
-        <div id="history">
-            <ul>
-                <!-- <li>
-                    <p>Perdedor</p>
-                    <p>Pontuação</p>
-                    <p>Data</p>
-                </li>
-                <li>
-                    <p>Perdedor</p>
-                    <p>Pontuação</p>
-                    <p>Data</p>
-                </li> -->
-            </ul>
         </div>
     </main>
     <div id="select-score" style=" display: none;">
@@ -80,6 +66,50 @@
         </div>
         <button type="button" id="check-results-button" onclick="event.target.parentNode.style='opacity:0;'">Conferir
             resultado</button>
+    </div>
+
+    <!--sidebar-->
+    <div class="rcf-sidebar-backdrop" onclick="toggleSidebar('close')">
+    </div>
+
+    <div class="rcf-sidebar text-white rcf-sidebar-open">
+        <h2 style="text-align: center; text-transform: uppercase;">Histórico</h2>
+        <div class="rcf-sidebar-filters">
+            <ul style="display: flex;">
+                <li>
+                    <button onclick="onSelectFilter(1)" [ngClass]="{'filter-active':currentFilter==='C'}"
+                        class="filter-btn" type="button">D<span>errota</span></button>
+                </li>
+                <li>
+                    <button onclick="onSelectFilter(2)" [ngClass]="{'filter-active':currentFilter==='S'}"
+                        class="filter-btn" type="button">V<span>itória</span></button>
+                </li>
+                <li>
+                    <button onclick="onSelectFilter(3)" class="filter-btn" type="button">6<span>66</span></button>
+                </li>
+            </ul>
+        </div>
+        <ul class="rcf-sidebar-list">
+            <li>
+                <p>
+                    Jogo #1<br />
+                    Perdedor: romão<br />
+                    Pontuação: 3<br />
+                </p>
+            </li>
+        </ul>
+    </div>
+
+    <div class="modal">
+        <div>
+            <h5 class="uppercase" style="color:var(--color3);margin:0"></h5>
+        </div>
+
+        <div class="modal-buttons">
+            <button type="button" class="contact">
+                <img alt="">
+            </button>
+        </div>
     </div>
 
     <div id="version"></div>
