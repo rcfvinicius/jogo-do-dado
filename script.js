@@ -108,7 +108,7 @@ function setCell(i, player) {
     const div = document.createElement('div');
     if (i === 0) {
         const playerWins = userWins[player.name] ? userWins[player.name] : 0;
-        div.innerHTML = `<span>${player.name}<span>${playerWins ? ' <span class=\"player-wins\">(' + playerWins + ' derrotas)</span>': ''}</span></span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
+        div.innerHTML = `<span>${player.name}<span>${playerWins ? ' <span class=\"player-wins\">(' + playerWins + ' derrotas)</span>' : ''}</span></span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
         div.classList.add('player-name-container');
         div.querySelector(`button[data-id="${player.id}"]`).addEventListener('click', removePlayer);
     }
@@ -147,10 +147,17 @@ function setPlayers() {
 }
 
 function getHistory() {
-    const history = localStorage.getItem('history');
+    let history = localStorage.getItem('history');
 
     if (history === null) return new Array();
-    return JSON.parse(history);
+
+    history = JSON.parse(history);
+    if (history.every((item) => !item.gameNumber)) {
+        history.forEach((item, i) => {
+            item.gameNumber = i + 1;
+        });
+    }
+    return history;
 }
 
 function showHistory() {
@@ -159,9 +166,11 @@ function showHistory() {
 }
 
 function saveMatch() {
+    const gameNumber = history.length + 1;
     history.push({
         players, //vai salvar o id também, mas não será utilizado
-        date: getDate()
+        date: getDate(),
+        gameNumber
     });
 
     localStorage.setItem('history', JSON.stringify(history));
@@ -205,9 +214,9 @@ function showToast(message) {
     const text = document.createElement('h3');
     text.innerText = message;
     toast.appendChild(text);
-    
+
     const toastElements = toastArea.querySelectorAll('.toast');
-    if(toastElements.length > 0) toastArea.insertBefore(toast, toastElements[0]);
+    if (toastElements.length > 0) toastArea.insertBefore(toast, toastElements[0]);
     else toastArea.appendChild(toast);
 
     window.setTimeout(toast.remove.bind(toast), 5000);
@@ -304,9 +313,9 @@ function getUserWinHistory() {
         let losingPlayers = [];
         match.players.forEach((player) => {
             if (losingPlayers.length === 0) return losingPlayers = [player]; // adicionar o primeiro caso e ir pro próximo loop.
-            
+
             const winningPlayer = losingPlayers.at(0) // nunca winningPlayer e player vão ser o mesmo, então é seguro.
-            
+
             if (player.total > winningPlayer.total) return;
             if (player.total === winningPlayer.total) return losingPlayers.push(player); // caso total for igual ao do jogador vencedor, contar os dois (ou mais já que é push).
             losingPlayers = [player]; // caso total for maior que o vencedor atual, substitua o vencedor.
@@ -324,39 +333,40 @@ function getUserWinHistory() {
 // #region Sidebar
 let currentFilter;
 
-function loadSidebar(items){
-    if(!items) items = history;
+function loadSidebar(items) {
+    if (!items) items = history;
     let xxx = [{
-            "players":[
-                {"id":"0","name":"fff","throws":[2,6,4],"total":12},
-                {"id":"1","name":"323f","throws":[1,5,4],"total":10}
-            ],
-            "date":"08/08/2026"
-        }];
+        "players": [
+            { "id": "0", "name": "fff", "throws": [2, 6, 4], "total": 12 },
+            { "id": "1", "name": "323f", "throws": [1, 5, 4], "total": 10 }
+        ],
+        "date": "08/08/2026"
+    }];
 
-    if(!items.length) document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.setAttribute('disabled',''));
+    if (!items.length) document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.setAttribute('disabled', ''));
     else document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.removeAttribute('disabled'));
 
     const ul = document.querySelector('.rcf-sidebar-list');
     ul.innerHTML = '';
-    items.forEach((current, i)=>{
+    items.forEach((current, i) => {
         const li = document.createElement('li');
-        li.style.animationDelay = i*3*(i>20?0:1)+'0ms';
-        if(i > 300) li.classList.add('remove-li-animation');
+        li.style.animationDelay = i * 3 * (i > 20 ? 0 : 1) + '0ms';
+        if (i > 300) li.classList.add('remove-li-animation');
+        const loser = getLoser(current);
         li.innerHTML = `
             <p>
-                Jogo #${i + 1}<br />
-                Perdedor: ${'romaozinho'}<br />
-                Pontuação: 4<br />
+                Jogo #${current.gameNumber}<br />
+                Perdedor: ${loser?.name ?? 'Empate'}<br />
+                Pontuação: ${loser?.total ?? '0'}<br />
             </p>
-        `
+        `;
 
         ul.appendChild(li);
     })
 }
 
 function onSelectFilter(filter = null) {
-    console.log(filter)
+    console.log(filter, currentFilter)
     document.querySelector('.rcf-sidebar ul').scrollTop = 0;
     document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.classList.remove('filter-active'));
     if (filter === currentFilter) {
@@ -364,34 +374,90 @@ function onSelectFilter(filter = null) {
         loadSidebar();
         return;
     }
-    document.querySelector(`.rcf-sidebar-filters li:nth-child(${filter}) .filter-btn`).classList.add('filter-active')
+    document.querySelector(`.rcf-sidebar-filters li:nth-child(${filter}) .filter-btn`).classList.add('filter-active');
     currentFilter = filter;
 
-    let items;
-    if(filter === 1){
-        const listUsers = new Map();
+    let items = new Array();
+    if (filter === 1) {
+        const defeats = new Map();
         history.forEach((current) => {
             const loser = getLoser(current);
-            if(!loser) return;
+            if (!loser) return;
 
-            if(!listUsers.has(loser.name)) return listUsers.set(loser.name, 1);
-            listUsers.set(loser.name, listUsers.get(loser.name) + 1);
+            if (!defeats.has(loser.name)) return defeats.set(loser.name, 1);
+            defeats.set(loser.name, defeats.get(loser.name) + 1);
+        });
+        console.log(defeats)
+        debugger;
+
+        while (defeats.size) {
+            let bigger = 0;
+            let name;
+            for (const entry of defeats) {
+                if (entry[1] > bigger) {
+                    bigger = entry[1];
+                    name = entry[0];
+                }
+            }
+            defeats.delete(name);
+            console.log(name, bigger)
+            for (let i = 0; i < bigger; i++) {
+                history.forEach((current, i) => {
+                    if (!items.some((item) => item.date === current.date && getLoser(item)?.name === getLoser(current)?.name)) {
+                        items.push(current)
+                    }
+                })
+            }
+        }
+
+        items = history.toSorted((a, b) => {
+            const loserA = getLoser(a);
+            const loserB = getLoser(b);
+
+            const defeatsA = defeats.get(loserA?.name) ?? 0;
+            const defeatsB = defeats.get(loserB?.name) ?? 0;
+
+            return defeatsB - defeatsA;
         });
 
-        while(listUsers.size) {
+        /* const listUsersOrdered = new Array();
+        while (listUsers.size) {
+            let bigger = 0;
+            let name;
+            for (const value of listUsers) {
+                if (value[1] > bigger) {
+                    bigger = value[1];
+                    name = value[0];
+                }
+            }
 
+            listUsersOrdered.push(name);
+            listUsers.delete(name);
         }
+
+        console.log(listUsersOrdered);
+        debugger;
+        for (let i = listUsersOrdered.length - 1; i >= 0; i--) {
+            history.forEach((current) => {
+                const loser = getLoser(current);//TODO: o i seria o número do jogo. Usar depois
+                if (loser?.name !== listUsersOrdered[i]) return;
+
+                items.unshift(current);
+            })
+        } */
+
 
     }
 
     loadSidebar(items);
 }
 
-function getLoser(listItem){
+function getLoser(listItem) {
     let min = 20;
     let loser;
 
-    for(const player of listItem.players){
+    for (const player of listItem.players) {
+        if (player.total === 3) console.log(player.name, player.total)
         if (player.total === min) return null;
         if (player.total < min) {
             min = player.total;
