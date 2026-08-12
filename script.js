@@ -8,6 +8,7 @@ const addInput = document.querySelector('#add-player-row input');
 let players = new Array();
 let lastID = 0;
 let isAdding = false;
+let currentFilter;
 setPlayers();
 loadSidebar();
 
@@ -331,9 +332,12 @@ function getUserWinHistory() {
 }
 
 // #region Sidebar
-let currentFilter;
 
 function loadSidebar(items) {
+    if (!history.length) {
+        document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.setAttribute('disabled', ''));
+        //TODO: colocar uma mensagem falando para jogar para salvar no histórico
+    }
     if (!items) items = history;
     let xxx = [{
         "players": [
@@ -343,25 +347,39 @@ function loadSidebar(items) {
         "date": "08/08/2026"
     }];
 
-    if (!items.length) document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.setAttribute('disabled', ''));
-    else document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.removeAttribute('disabled'));
-
     const ul = document.querySelector('.rcf-sidebar-list');
     ul.innerHTML = '';
+    let lastGroup = null;
+
     items.forEach((current, i) => {
         const li = document.createElement('li');
         li.style.animationDelay = i * 3 * (i > 20 ? 0 : 1) + '0ms';
         if (i > 300) li.classList.add('remove-li-animation');
         const loser = getLoser(current);
+        if (i === 0) lastGroup = loser.name;
+        if(currentFilter && (lastGroup !== loser.name)) {
+            ul.prepend(`
+                <li><h2>${lastGroup}</h2></li>
+                `);
+            lastGroup = loser.name;
+        }
+
         li.innerHTML = `
             <p>
                 Jogo #${current.gameNumber}<br />
                 Perdedor: ${loser?.name ?? 'Empate'}<br />
-                Pontuação: ${loser?.total ?? '0'}<br />
+                data: ${current.date}
             </p>
-        `;
+        `;//Pontuação: ${loser?.total ?? '0'}<br />
 
-        ul.appendChild(li);
+        ul.prepend(li);
+
+        if (currentFilter && i === items.length - 1) {
+            ul.prepend(`
+                <li><h2>${lastGroup}</h2></li>
+            `);
+            //TODO: criar função para verificar o número de derrotas de cada grupo
+        }
     })
 }
 
@@ -378,87 +396,45 @@ function onSelectFilter(filter = null) {
     currentFilter = filter;
 
     let items = new Array();
-    if (filter === 1) {
-        const defeats = new Map();
+    const defeats = new Array();
+
+    history.forEach((current) => {
+        const loser = getLoser(current, filter === 3);
+        if (!loser) return;
+
+        if (!defeats.some(x => x.name === loser.name)) return defeats.push({name:loser.name, defeats: 1});
+        defeats.find(x => x.name === loser.name).defeats += 1;
+    });
+    defeats.sort((a, b) => {
+        if (filter === 1) return b.defeats - a.defeats;
+        if (filter === 2) return a.defeats - b.defeats;
+    });
+
+    for(let i = defeats.length - 1; i >= 0; i--) {
         history.forEach((current) => {
             const loser = getLoser(current);
-            if (!loser) return;
-
-            if (!defeats.has(loser.name)) return defeats.set(loser.name, 1);
-            defeats.set(loser.name, defeats.get(loser.name) + 1);
+            if (loser?.name === defeats[i].name) {
+                items.push(current);
+            }
         });
-        console.log(defeats)
-        debugger;
-
-        while (defeats.size) {
-            let bigger = 0;
-            let name;
-            for (const entry of defeats) {
-                if (entry[1] > bigger) {
-                    bigger = entry[1];
-                    name = entry[0];
-                }
-            }
-            defeats.delete(name);
-            console.log(name, bigger)
-            for (let i = 0; i < bigger; i++) {
-                history.forEach((current, i) => {
-                    if (!items.some((item) => item.date === current.date && getLoser(item)?.name === getLoser(current)?.name)) {
-                        items.push(current)
-                    }
-                })
-            }
-        }
-
-        items = history.toSorted((a, b) => {
-            const loserA = getLoser(a);
-            const loserB = getLoser(b);
-
-            const defeatsA = defeats.get(loserA?.name) ?? 0;
-            const defeatsB = defeats.get(loserB?.name) ?? 0;
-
-            return defeatsB - defeatsA;
-        });
-
-        /* const listUsersOrdered = new Array();
-        while (listUsers.size) {
-            let bigger = 0;
-            let name;
-            for (const value of listUsers) {
-                if (value[1] > bigger) {
-                    bigger = value[1];
-                    name = value[0];
-                }
-            }
-
-            listUsersOrdered.push(name);
-            listUsers.delete(name);
-        }
-
-        console.log(listUsersOrdered);
-        debugger;
-        for (let i = listUsersOrdered.length - 1; i >= 0; i--) {
-            history.forEach((current) => {
-                const loser = getLoser(current);//TODO: o i seria o número do jogo. Usar depois
-                if (loser?.name !== listUsersOrdered[i]) return;
-
-                items.unshift(current);
-            })
-        } */
-
-
     }
 
     loadSidebar(items);
 }
 
-function getLoser(listItem) {
+function getLoser(listItem, only666 = false) {
     let min = 20;
     let loser;
 
     for (const player of listItem.players) {
-        if (player.total === 3) console.log(player.name, player.total)
         if (player.total === min) return null;
+        if (only666) {
+            if (player.total < min && player.total === 3) {
+                min = player.total;
+                loser = player;
+            }
+            continue;
+        }
         if (player.total < min) {
             min = player.total;
             loser = player;

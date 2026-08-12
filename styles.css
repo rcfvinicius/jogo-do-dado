@@ -642,15 +642,15 @@ button[type="button"] {
   }
 
   & li:nth-child(1) .filter-btn:not(:disabled).filter-active {
-    background-color: #ff7600;
+    background-color: rgb(179, 3, 3);
   }
 
   & li:nth-child(2) .filter-btn:not(:disabled).filter-active {
-    background-color: green;
+    background-color: rgb(0, 112, 0);
   }
 
   & li:nth-child(3) .filter-btn:not(:disabled).filter-active {
-    background-color: red;
+    background-color: purple;
   }
 
   & li:not(:last-child) .filter-btn {
