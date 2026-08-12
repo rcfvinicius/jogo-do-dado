@@ -161,11 +161,6 @@ function getHistory() {
     return history;
 }
 
-function showHistory() {
-    if (history.length === 0) return;
-    document.querySelector('#history')//TODO: exibir histórico
-}
-
 function saveMatch() {
     const gameNumber = history.length + 1;
     history.push({
@@ -339,53 +334,95 @@ function loadSidebar(items) {
         //TODO: colocar uma mensagem falando para jogar para salvar no histórico
     }
     if (!items) items = history;
-    let xxx = [{
-        "players": [
-            { "id": "0", "name": "fff", "throws": [2, 6, 4], "total": 12 },
-            { "id": "1", "name": "323f", "throws": [1, 5, 4], "total": 10 }
-        ],
-        "date": "08/08/2026"
-    }];
-
     const ul = document.querySelector('.rcf-sidebar-list');
     ul.innerHTML = '';
     let lastGroup = null;
 
     items.forEach((current, i) => {
         const li = document.createElement('li');
-        li.style.animationDelay = i * 3 * (i > 20 ? 0 : 1) + '0ms';
+        const animationDelay = (items.length - 1 - i) * 3 * (i > 20 ? 0 : 1) + '0ms';
+        li.style.animationDelay = animationDelay;
         if (i > 300) li.classList.add('remove-li-animation');
         const loser = getLoser(current);
         if (i === 0) lastGroup = loser.name;
-        if(currentFilter && (lastGroup !== loser.name)) {
-            ul.prepend(`
-                <li><h2>${lastGroup}</h2></li>
-                `);
+        if (currentFilter && (lastGroup !== loser.name)) {
+            const divider = document.createElement('li');
+            divider.style.animationDelay = animationDelay;
+            divider.innerHTML = `<h2>${lastGroup.toUpperCase()}</h2> ${defeatCounter(lastGroup, items)}`;
+            ul.prepend(divider);
             lastGroup = loser.name;
         }
 
         li.innerHTML = `
             <p>
                 Jogo #${current.gameNumber}<br />
-                Perdedor: ${loser?.name ?? 'Empate'}<br />
+                Perdedor: <b>${loser?.name?.toUpperCase() ?? 'Empate'}</b><br />
                 data: ${current.date}
             </p>
         `;//Pontuação: ${loser?.total ?? '0'}<br />
 
+        li.addEventListener('click', () => onMatchSelected(current.gameNumber));
         ul.prepend(li);
 
         if (currentFilter && i === items.length - 1) {
-            ul.prepend(`
-                <li><h2>${lastGroup}</h2></li>
-            `);
-            //TODO: criar função para verificar o número de derrotas de cada grupo
+            const divider = document.createElement('li');
+            divider.style.animationDelay = animationDelay;
+            divider.innerHTML = `<h2>${lastGroup.toUpperCase()}</h2> ${defeatCounter(lastGroup, items)}`;
+            ul.prepend(divider);
         }
     })
 }
 
+function onMatchSelected(gameNumber) {
+    const modal = document.querySelector('.modal');
+    modal.classList.add('open');
+    modal.innerHTML = `
+        <div>
+            <span>Jogadores</span>
+        </div>
+        <div>Pontuação</div>
+        <div>Total</div>
+    `;
+
+    const match = history.find(x => x.gameNumber === gameNumber);
+
+    match.players.forEach((player) => {
+        for (let i = 0; i < 3; i++) {
+            const div = document.createElement('div');
+            if (i === 0) {
+                div.innerHTML = `<span>${player.name}</span>`;
+                div.classList.add('player-name-container');
+            } else if (i === 1) {
+                for (let j = 0; j < 3; j++) {
+                    const button = document.createElement('button');
+                    button.setAttribute('type', 'button');
+                    button.classList.add('score-button');
+                    button.innerHTML = `<img src="./images/dado-${player.throws[j]}.svg"/>`;
+                    div.appendChild(button);
+                }
+                div.classList.add('score-container');
+            } else if (i === 2) {
+                div.innerText = player.throws.reduce((acc, crr) => acc + crr, 0);
+                div.classList.add('total-container');
+            }
+
+            modal.appendChild(div);
+        }
+    });
+}
+
+function defeatCounter(name, items) {
+    let counter = 0;
+    items.forEach((item) => {
+        const loser = getLoser(item);
+        if (loser?.name === name) counter++;
+    });
+
+    return counter;
+}
+
 function onSelectFilter(filter = null) {
-    console.log(filter, currentFilter)
-    document.querySelector('.rcf-sidebar ul').scrollTop = 0;
+    document.querySelector('.rcf-sidebar .rcf-sidebar-list').scrollTop = 0;
     document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.classList.remove('filter-active'));
     if (filter === currentFilter) {
         currentFilter = null;
@@ -402,17 +439,18 @@ function onSelectFilter(filter = null) {
         const loser = getLoser(current, filter === 3);
         if (!loser) return;
 
-        if (!defeats.some(x => x.name === loser.name)) return defeats.push({name:loser.name, defeats: 1});
+        if (!defeats.some(x => x.name === loser.name)) return defeats.push({ name: loser.name, defeats: 1 });
         defeats.find(x => x.name === loser.name).defeats += 1;
     });
     defeats.sort((a, b) => {
         if (filter === 1) return b.defeats - a.defeats;
         if (filter === 2) return a.defeats - b.defeats;
+        return 0;
     });
 
-    for(let i = defeats.length - 1; i >= 0; i--) {
+    for (let i = defeats.length - 1; i >= 0; i--) {
         history.forEach((current) => {
-            const loser = getLoser(current);
+            const loser = getLoser(current, filter === 3);
             if (loser?.name === defeats[i].name) {
                 items.push(current);
             }
@@ -457,8 +495,11 @@ function toggleSidebar(action = 'close') {
         document.querySelector('.rcf-sidebar-backdrop').style.display = 'none';
         document.querySelector('.rcf-sidebar').classList.remove('rcf-sidebar-open');
         document.querySelector(':root').classList.remove('rcf-overflow-hidden');
+        document.querySelector('.modal').classList.remove('open');
     }
 }
+
+//#endregion
 
 window.addEventListener('resize', () => setSelectScorePosition());
 

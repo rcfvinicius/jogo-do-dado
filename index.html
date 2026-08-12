@@ -72,45 +72,25 @@
     <div class="rcf-sidebar-backdrop" onclick="toggleSidebar('close')">
     </div>
 
-    <div class="rcf-sidebar text-white rcf-sidebar-open">
-        <h2 style="text-align: center; text-transform: uppercase;">Histórico</h2>
+    <div class="rcf-sidebar rcf-sidebar-open">
+        <h2 style="text-align: center; text-transform: uppercase; color: white;">Histórico</h2>
         <div class="rcf-sidebar-filters">
             <ul style="display: flex;">
                 <li>
-                    <button onclick="onSelectFilter(1)"
-                        class="filter-btn" type="button">D<span>errota</span></button>
+                    <button onclick="onSelectFilter(1)" class="filter-btn" type="button">D<span>errota</span></button>
                 </li>
                 <li>
-                    <button onclick="onSelectFilter(2)"
-                        class="filter-btn" type="button">V<span>itória</span></button>
+                    <button onclick="onSelectFilter(2)" class="filter-btn" type="button">V<span>itória</span></button>
                 </li>
                 <li>
                     <button onclick="onSelectFilter(3)" class="filter-btn" type="button">6<span>66</span></button>
                 </li>
             </ul>
         </div>
-        <ul class="rcf-sidebar-list">
-            <li>
-                <p>
-                    Jogo #1<br />
-                    Perdedor: romão<br />
-                    Pontuação: 3<br />
-                </p>
-            </li>
-        </ul>
+        <ul class="rcf-sidebar-list"></ul>
     </div>
 
-    <div class="modal">
-        <div>
-            <h5 class="uppercase" style="color:var(--color3);margin:0"></h5>
-        </div>
-
-        <div class="modal-buttons">
-            <button type="button" class="contact">
-                <img alt="">
-            </button>
-        </div>
-    </div>
+    <div class="modal"></div>
 
     <div id="version"></div>
     <div id="toast-area"></div>
