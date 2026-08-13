@@ -55,18 +55,24 @@ header {
   width: 100vw;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   position: relative;
 }
 
-#toggle-sidebar-btn {
-  position: absolute;
-  top: 23px;
-  left: 15px;
-}
 
 #change-theme {
-  position: absolute;
+  top: 23px;
+  left: 15px;
+  height: 35px;
+  margin-left: 20px;
+
+  & img {
+    height: 100%;
+  }
+}
+
+#toggle-sidebar-btn {
+  margin-right: 25px;
   top: 23px;
   right: 15px;
   height: 35px;
@@ -501,13 +507,14 @@ button[type="button"] {
 /* estilos da sidebar */
 
 .rcf-sidebar-backdrop {
-  background-color: rgba(46, 48, 48, 0.603);
+  background-color: light-dark(rgba(46, 48, 48, 0.849), rgba(46, 48, 48, 0.603));
   position: absolute;
   height: 100vh;
   width: 100vw;
   left: 0;
   top: 0;
   z-index: 99;
+  display: none;
 }
 
 .rcf-sidebar {
@@ -645,15 +652,15 @@ button[type="button"] {
   }
 
   & li:nth-child(1) .filter-btn:not(:disabled).filter-active {
-    background-color: rgb(179, 3, 3);
+    background-color: rgb(166, 0, 0);
   }
 
   & li:nth-child(2) .filter-btn:not(:disabled).filter-active {
-    background-color: rgb(0, 112, 0);
+    background-color: rgb(0, 89, 0);
   }
 
   & li:nth-child(3) .filter-btn:not(:disabled).filter-active {
-    background-color: purple;
+    background-color: #690086;
   }
 
   & li:not(:last-child) .filter-btn {
@@ -798,5 +805,19 @@ button[type="button"] {
   &:active {
     transform: translateY(3px) !important;
     box-shadow: none !important;
+  }
+}
+
+
+.no-items {
+  cursor: default !important;
+  justify-content: start !important;
+  
+  & img {
+    width: 30px;
+  }
+
+  &:hover {
+    background-color: initial !important;
   }
 }

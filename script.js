@@ -329,13 +329,41 @@ function getUserWinHistory() {
 // #region Sidebar
 
 function loadSidebar(items) {
-    if (!history.length) {
-        document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.setAttribute('disabled', ''));
-        //TODO: colocar uma mensagem falando para jogar para salvar no histórico
-    }
-    if (!items) items = history;
     const ul = document.querySelector('.rcf-sidebar-list');
     ul.innerHTML = '';
+
+    if (!history.length) {
+        document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.setAttribute('disabled', ''));
+        const li = document.createElement('li');
+        li.classList.add('no-items');
+
+        const img = document.createElement('img');
+        img.src = '/images/circle-info-solid-full.svg';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = 'Nenhuma partida salva'
+        li.appendChild(img);
+        li.appendChild(h2);
+        ul.appendChild(li);
+        return;
+    }
+    if (items?.length === 0) {
+        const li = document.createElement('li');
+        li.classList.add('no-items');
+
+        const img = document.createElement('img');
+        img.src = '/images/circle-info-solid-full.svg';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = 'Nenhum item para o filtro selecionado'
+        li.appendChild(img);
+        li.appendChild(h2);
+        ul.appendChild(li);
+        return;
+    }
+
+    if (!items) items = history;
+
     let lastGroup = null;
 
     items.forEach((current, i) => {
@@ -483,7 +511,6 @@ function getLoser(listItem, only666 = false) {
 }
 
 function toggleSidebar(action = 'close') {
-    //if (!action) this.openNotifications = !this.openNotifications;
     if (action === 'open') {
         document.querySelector('.rcf-sidebar ul').scrollTop = 0;
         document.querySelector('.rcf-sidebar-backdrop').style.display = 'block';
@@ -517,8 +544,14 @@ function setTheme(dark) {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
     root.style = `color-scheme:${dark ? 'dark' : 'light'}`;
 
-    if (dark) document.querySelector('#change-theme img').src = './images/sun-solid-full.svg';
-    else document.querySelector('#change-theme img').src = './images/moon-solid-full.svg';
+    if (dark) {
+        document.querySelector('#change-theme img').src = './images/sun-solid-full.svg';
+        document.querySelector('#toggle-sidebar-btn img').src = './images/menu-icon-white.svg';
+    }
+    else {
+        document.querySelector('#change-theme img').src = './images/moon-solid-full.svg';
+        document.querySelector('#toggle-sidebar-btn img').src = './images/menu-icon.svg';
+    }
 }
 
 function toggleTheme() {
