@@ -311,9 +311,10 @@ function getUserLossesHistory() {
         });
 
         if (losingPlayers.length === match.players.length) return; // empate total, não contar jogadores vencedores.
+        if (losingPlayers.length > 1) return; // 2 perdedores, não contar. 
 
-        losingPlayers.forEach((winningPlayer) => {
-            lossHistoryMap.set(winningPlayer.name, lossHistoryMap.get(winningPlayer.name) + 1 || 1);
+        losingPlayers.forEach((losingPlayer) => {
+            lossHistoryMap.set(losingPlayer.name, lossHistoryMap.get(losingPlayer.name) + 1 || 1);
         });
     });
     return Object.fromEntries(lossHistoryMap);
