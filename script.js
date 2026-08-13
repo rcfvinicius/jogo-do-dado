@@ -105,8 +105,8 @@ function updateView(action, id = null) {
 function setCell(i, player) {
     const div = document.createElement('div');
     if (i === 0) {
-        const playerWins = userLosses[player.name] ? userLosses[player.name] : 0;
-        div.innerHTML = `<span>${player.name}<span>${playerWins ? ' <span class=\"player-wins\">(' + playerWins + ' derrotas)</span>': ''}</span></span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
+        const playerLosses = userLosses[player.name] ? userLosses[player.name] : 0;
+        div.innerHTML = `<span>${player.name}<span>${playerLosses ? ' <span class=\"player-wins\">(' + playerLosses + ' derrotas)</span>': ''}</span></span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
         div.classList.add('player-name-container');
         div.querySelector(`button[data-id="${player.id}"]`).addEventListener('click', removePlayer);
     }
