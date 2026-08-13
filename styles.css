@@ -59,6 +59,9 @@ header {
   position: relative;
 }
 
+b {
+  text-decoration: underline;
+}
 
 #change-theme {
   top: 23px;
@@ -507,7 +510,10 @@ button[type="button"] {
 /* estilos da sidebar */
 
 .rcf-sidebar-backdrop {
-  background-color: light-dark(rgba(46, 48, 48, 0.849), rgba(46, 48, 48, 0.603));
+  background-color: light-dark(
+    rgba(46, 48, 48, 0.849),
+    rgba(46, 48, 48, 0.603)
+  );
   position: absolute;
   height: 100vh;
   width: 100vw;
@@ -808,16 +814,33 @@ button[type="button"] {
   }
 }
 
-
 .no-items {
   cursor: default !important;
   justify-content: start !important;
-  
+
   & img {
     width: 30px;
   }
 
   &:hover {
     background-color: initial !important;
+  }
+}
+
+.blink-line {
+  animation-name: blink-line-ani;
+  animation-delay: 600ms;
+  animation-duration: 400ms;
+  animation-timing-function: steps(2, start);
+  animation-iteration-count: 3;
+}
+
+@keyframes blink-line-ani {
+  from {
+    background-color: red;
+  }
+
+  to {
+    background-color: transparent;
   }
 }

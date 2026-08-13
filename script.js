@@ -8,6 +8,7 @@ const addInput = document.querySelector('#add-player-row input');
 let players = new Array();
 let lastID = 0;
 let isAdding = false;
+let isModalOpen = false;
 let currentFilter;
 setPlayers();
 loadSidebar();
@@ -330,6 +331,7 @@ function getUserWinHistory() {
 
 function loadSidebar(items) {
     const ul = document.querySelector('.rcf-sidebar-list');
+    ul.scrollTo(0, 0);
     ul.innerHTML = '';
 
     if (!history.length) {
@@ -372,7 +374,7 @@ function loadSidebar(items) {
         li.style.animationDelay = animationDelay;
         if (i > 300) li.classList.add('remove-li-animation');
         const loser = getLoser(current);
-        if (i === 0) lastGroup = loser.name;
+        if (i === 0) lastGroup = loser?.name;
         if (currentFilter && (lastGroup !== loser.name)) {
             const divider = document.createElement('li');
             divider.style.animationDelay = animationDelay;
@@ -385,7 +387,7 @@ function loadSidebar(items) {
             <p>
                 Jogo #${current.gameNumber}<br />
                 Perdedor: <b>${loser?.name?.toUpperCase() ?? 'Empate'}</b><br />
-                data: ${current.date}
+                Data: ${current.date}
             </p>
         `;//Pontuação: ${loser?.total ?? '0'}<br />
 
@@ -398,7 +400,7 @@ function loadSidebar(items) {
             divider.innerHTML = `<h2>${lastGroup.toUpperCase()}</h2> ${defeatCounter(lastGroup, items)}`;
             ul.prepend(divider);
         }
-    })
+    });
 }
 
 function onMatchSelected(gameNumber) {
@@ -411,8 +413,14 @@ function onMatchSelected(gameNumber) {
         <div>Pontuação</div>
         <div>Total</div>
     `;
+    if (!isModalOpen) {
+        setTimeout(() => {
+            isModalOpen = true;
+        }, 500);
+    }
 
     const match = history.find(x => x.gameNumber === gameNumber);
+    const loserName = getLoser(match)?.name;
 
     match.players.forEach((player) => {
         for (let i = 0; i < 3; i++) {
@@ -434,6 +442,12 @@ function onMatchSelected(gameNumber) {
                 div.classList.add('total-container');
             }
 
+            if (loserName === player.name) {
+                div.classList.add('blink-line');
+                if (isModalOpen) {
+                    div.style.animationDelay = '0s';
+                }
+            }
             modal.appendChild(div);
         }
     });
@@ -450,7 +464,6 @@ function defeatCounter(name, items) {
 }
 
 function onSelectFilter(filter = null) {
-    document.querySelector('.rcf-sidebar .rcf-sidebar-list').scrollTop = 0;
     document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.classList.remove('filter-active'));
     if (filter === currentFilter) {
         currentFilter = null;
@@ -493,7 +506,6 @@ function getLoser(listItem, only666 = false) {
     let loser;
 
     for (const player of listItem.players) {
-        if (player.total === min) return null;
         if (only666) {
             if (player.total < min && player.total === 3) {
                 min = player.total;
@@ -507,6 +519,11 @@ function getLoser(listItem, only666 = false) {
         }
     }
 
+    const losers = listItem.players.filter(p => {
+        return p.throws.reduce((acc, crr) => acc + crr, 0) === min;
+    });
+
+    if (losers.length > 1) return null;
     return loser;
 }
 
@@ -516,13 +533,16 @@ function toggleSidebar(action = 'close') {
         document.querySelector('.rcf-sidebar-backdrop').style.display = 'block';
         document.querySelector('.rcf-sidebar').classList.add('rcf-sidebar-open');
         document.querySelector(':root').classList.add('rcf-overflow-hidden');
-
+        document.querySelector('.rcf-sidebar-list').scrollTo(0, 0);
     }
     if (action === 'close') {
         document.querySelector('.rcf-sidebar-backdrop').style.display = 'none';
         document.querySelector('.rcf-sidebar').classList.remove('rcf-sidebar-open');
         document.querySelector(':root').classList.remove('rcf-overflow-hidden');
         document.querySelector('.modal').classList.remove('open');
+        setTimeout(() => {
+            isModalOpen = false;
+        }, 500);
     }
 }
 
