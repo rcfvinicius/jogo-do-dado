@@ -4,7 +4,7 @@ const root = document.querySelector(':root');
 setTheme(getTheme() === 'dark');
 /** A lista nunca é reordenada. A ordem é sempre a mesma (da partida mais antiga para a mais recente) */
 const history = getHistory();
-const userWins = getUserWinHistory();
+const userLosses = getUserLossesHistory();
 const addInput = document.querySelector('#add-player-row input');
 let players = new Array();
 let lastID = 0;
@@ -110,8 +110,8 @@ function updateView(action, id = null) {
 function setCell(i, player) {
     const div = document.createElement('div');
     if (i === 0) {
-        const playerWins = userWins[player.name] ? userWins[player.name] : 0;
-        div.innerHTML = `<span>${player.name}<span>${playerWins ? ' <span class=\"player-wins\">(' + playerWins + ' derrotas)</span>' : ''}</span></span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
+        const playerLosses = userLosses[player.name] ? userLosses[player.name] : 0;
+        div.innerHTML = `<span>${player.name}<span>${playerLosses ? ' <span class=\"player-wins\">(' + playerLosses + ' derrotas)</span>': ''}</span></span><button class="remove-button" data-id="${player.id}" type="button"></button>`;
         div.classList.add('player-name-container');
         div.querySelector(`button[data-id="${player.id}"]`).addEventListener('click', removePlayer);
     }
@@ -304,28 +304,29 @@ function setSelectScorePosition(e) {
     }
 }
 
-function getUserWinHistory() {
+function getUserLossesHistory() {
     /** @type {Map<string, number>} */
-    const winHistoryMap = new Map();
+    const lossHistoryMap = new Map();
     history.forEach((match) => {
         let losingPlayers = [];
         match.players.forEach((player) => {
             if (losingPlayers.length === 0) return losingPlayers = [player]; // adicionar o primeiro caso e ir pro próximo loop.
-
-            const winningPlayer = losingPlayers.at(0) // nunca winningPlayer e player vão ser o mesmo, então é seguro.
-
-            if (player.total > winningPlayer.total) return;
-            if (player.total === winningPlayer.total) return losingPlayers.push(player); // caso total for igual ao do jogador vencedor, contar os dois (ou mais já que é push).
+            
+            const losingPlayer = losingPlayers.at(0) // nunca winningPlayer e player vão ser o mesmo, então é seguro.
+            
+            if (player.total > losingPlayer.total) return;
+            if (player.total === losingPlayer.total) return losingPlayers.push(player); // caso total for igual ao do jogador vencedor, contar os dois (ou mais já que é push).
             losingPlayers = [player]; // caso total for maior que o vencedor atual, substitua o vencedor.
         });
 
         if (losingPlayers.length === match.players.length) return; // empate total, não contar jogadores vencedores.
+        if (losingPlayers.length > 1) return; // 2 perdedores, não contar. 
 
-        losingPlayers.forEach((winningPlayer) => {
-            winHistoryMap.set(winningPlayer.name, winHistoryMap.get(winningPlayer.name) + 1 || 1);
+        losingPlayers.forEach((losingPlayer) => {
+            lossHistoryMap.set(losingPlayer.name, lossHistoryMap.get(losingPlayer.name) + 1 || 1);
         });
     });
-    return Object.fromEntries(winHistoryMap);
+    return Object.fromEntries(lossHistoryMap);
 }
 
 // #region Sidebar
