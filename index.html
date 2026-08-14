@@ -12,8 +12,11 @@
 
 <body>
     <header>
-        <h1 id="title">Jogo do dado</h1>
         <button id="change-theme" type="button">
+            <img />
+        </button>
+        <h1 id="title">Jogo do dado</h1>
+        <button id="toggle-sidebar-btn" type="button" onclick="toggleSidebar('open')">
             <img />
         </button>
     </header>
@@ -37,21 +40,6 @@
                     <img src="./images/xmark-solid-full.svg" />
                 </button>
             </div>
-        </div>
-
-        <div id="history">
-            <ul>
-                <!-- <li>
-                    <p>Perdedor</p>
-                    <p>Pontuação</p>
-                    <p>Data</p>
-                </li>
-                <li>
-                    <p>Perdedor</p>
-                    <p>Pontuação</p>
-                    <p>Data</p>
-                </li> -->
-            </ul>
         </div>
     </main>
     <div id="select-score" style=" display: none;">
@@ -82,6 +70,29 @@
             resultado</button>
     </div>
 
+    <!--sidebar-->
+    <div class="rcf-sidebar-backdrop" onclick="toggleSidebar('close')">
+    </div>
+
+    <div class="rcf-sidebar">
+        <h2 style="text-align: center; text-transform: uppercase; color: white;">Histórico</h2>
+        <div class="rcf-sidebar-filters">
+            <ul style="display: flex;">
+                <li>
+                    <button onclick="onSelectFilter(1)" class="filter-btn" type="button">D<span>errota</span></button>
+                </li>
+                <li>
+                    <button onclick="onSelectFilter(2)" class="filter-btn" type="button">V<span>itória</span></button>
+                </li>
+                <li>
+                    <button onclick="onSelectFilter(3)" class="filter-btn" type="button">6<span>66</span></button>
+                </li>
+            </ul>
+        </div>
+        <ul class="rcf-sidebar-list"></ul>
+    </div>
+
+    <div class="modal"></div>
     <div id="version"></div>
     <div id="toast-area"></div>
 </body>

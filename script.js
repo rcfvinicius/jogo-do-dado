@@ -1,13 +1,18 @@
 document.querySelector('#change-theme').addEventListener('click', toggleTheme);
+document.querySelector('#toggle-sidebar-btn').addEventListener('click', toggleSidebar);
 const root = document.querySelector(':root');
 setTheme(getTheme() === 'dark');
+/** A lista nunca é reordenada. A ordem é sempre a mesma (da partida mais antiga para a mais recente) */
 const history = getHistory();
 const userLosses = getUserLossesHistory();
 const addInput = document.querySelector('#add-player-row input');
 let players = new Array();
 let lastID = 0;
 let isAdding = false;
+let isModalOpen = false;
+let currentFilter;
 setPlayers();
+loadSidebar();
 
 document.querySelector('#unshift-btn').addEventListener('click', unshiftPlayers); //evento ao clicar para colocar o primeiro jogador em último.
 document.querySelector('#add-player-row button:last-child').addEventListener('click', handleEditRequest); //evento ao clicar para adicionar um jogador
@@ -145,21 +150,25 @@ function setPlayers() {
 }
 
 function getHistory() {
-    const history = localStorage.getItem('history');
+    let history = localStorage.getItem('history');
 
     if (history === null) return new Array();
-    return JSON.parse(history);
-}
 
-function showHistory() {
-    if (history.length === 0) return;
-    document.querySelector('#history')//TODO: exibir histórico
+    history = JSON.parse(history);
+    if (history.every((item) => !item.gameNumber)) {
+        history.forEach((item, i) => {
+            item.gameNumber = i + 1;
+        });
+    }
+    return history;
 }
 
 function saveMatch() {
+    const gameNumber = history.length + 1;
     history.push({
         players, //vai salvar o id também, mas não será utilizado
-        date: getDate()
+        date: getDate(),
+        gameNumber
     });
 
     localStorage.setItem('history', JSON.stringify(history));
@@ -203,9 +212,9 @@ function showToast(message) {
     const text = document.createElement('h3');
     text.innerText = message;
     toast.appendChild(text);
-    
+
     const toastElements = toastArea.querySelectorAll('.toast');
-    if(toastElements.length > 0) toastArea.insertBefore(toast, toastElements[0]);
+    if (toastElements.length > 0) toastArea.insertBefore(toast, toastElements[0]);
     else toastArea.appendChild(toast);
 
     window.setTimeout(toast.remove.bind(toast), 5000);
@@ -320,6 +329,227 @@ function getUserLossesHistory() {
     return Object.fromEntries(lossHistoryMap);
 }
 
+// #region Sidebar
+
+function loadSidebar(items) {
+    const ul = document.querySelector('.rcf-sidebar-list');
+    ul.scrollTo(0, 0);
+    ul.innerHTML = '';
+
+    if (!history.length) {
+        document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.setAttribute('disabled', ''));
+        const li = document.createElement('li');
+        li.classList.add('no-items');
+
+        const img = document.createElement('img');
+        img.src = '/images/circle-info-solid-full.svg';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = 'Nenhuma partida salva'
+        li.appendChild(img);
+        li.appendChild(h2);
+        ul.appendChild(li);
+        return;
+    }
+    if (items?.length === 0) {
+        const li = document.createElement('li');
+        li.classList.add('no-items');
+
+        const img = document.createElement('img');
+        img.src = '/images/circle-info-solid-full.svg';
+
+        const h2 = document.createElement('h2');
+        h2.textContent = 'Nenhum item para o filtro selecionado'
+        li.appendChild(img);
+        li.appendChild(h2);
+        ul.appendChild(li);
+        return;
+    }
+
+    if (!items) items = history;
+
+    let lastGroup = null;
+
+    items.forEach((current, i) => {
+        const li = document.createElement('li');
+        const animationDelay = (items.length - 1 - i) * 3 * (i > 20 ? 0 : 1) + '0ms';
+        li.style.animationDelay = animationDelay;
+        if (i > 300) li.classList.add('remove-li-animation');
+        const loser = getLoser(current);
+        if (i === 0) lastGroup = loser?.name;
+        if (currentFilter && (lastGroup !== loser.name)) {
+            const divider = document.createElement('li');
+            divider.style.animationDelay = animationDelay;
+            divider.innerHTML = `<h2>${lastGroup.toUpperCase()}</h2> ${defeatCounter(lastGroup, items)}`;
+            ul.prepend(divider);
+            lastGroup = loser.name;
+        }
+
+        li.innerHTML = `
+            <p>
+                Jogo #${current.gameNumber}<br />
+                Perdedor: <b>${loser?.name?.toUpperCase() ?? 'Empate'}</b><br />
+                Data: ${current.date}
+            </p>
+        `;//Pontuação: ${loser?.total ?? '0'}<br />
+
+        li.addEventListener('click', () => onMatchSelected(current.gameNumber));
+        ul.prepend(li);
+
+        if (currentFilter && i === items.length - 1) {
+            const divider = document.createElement('li');
+            divider.style.animationDelay = animationDelay;
+            divider.innerHTML = `<h2>${lastGroup.toUpperCase()}</h2> ${defeatCounter(lastGroup, items)}`;
+            ul.prepend(divider);
+        }
+    });
+}
+
+function onMatchSelected(gameNumber) {
+    const modal = document.querySelector('.modal');
+    modal.classList.add('open');
+    modal.innerHTML = `
+        <div>
+            <span>Jogadores</span>
+        </div>
+        <div>Pontuação</div>
+        <div>Total</div>
+    `;
+    if (!isModalOpen) {
+        setTimeout(() => {
+            isModalOpen = true;
+        }, 500);
+    }
+
+    const match = history.find(x => x.gameNumber === gameNumber);
+    const loserName = getLoser(match)?.name;
+
+    match.players.forEach((player) => {
+        for (let i = 0; i < 3; i++) {
+            const div = document.createElement('div');
+            if (i === 0) {
+                div.innerHTML = `<span>${player.name}</span>`;
+                div.classList.add('player-name-container');
+            } else if (i === 1) {
+                for (let j = 0; j < 3; j++) {
+                    const button = document.createElement('button');
+                    button.setAttribute('type', 'button');
+                    button.classList.add('score-button');
+                    button.innerHTML = `<img src="./images/dado-${player.throws[j]}.svg"/>`;
+                    div.appendChild(button);
+                }
+                div.classList.add('score-container');
+            } else if (i === 2) {
+                div.innerText = player.throws.reduce((acc, crr) => acc + crr, 0);
+                div.classList.add('total-container');
+            }
+
+            if (loserName === player.name) {
+                div.classList.add('blink-line');
+                if (isModalOpen) {
+                    div.style.animationDelay = '0s';
+                }
+            }
+            modal.appendChild(div);
+        }
+    });
+}
+
+function defeatCounter(name, items) {
+    let counter = 0;
+    items.forEach((item) => {
+        const loser = getLoser(item);
+        if (loser?.name === name) counter++;
+    });
+
+    return counter;
+}
+
+function onSelectFilter(filter = null) {
+    document.querySelectorAll('.rcf-sidebar-filters .filter-btn').forEach((e) => e.classList.remove('filter-active'));
+    if (filter === currentFilter) {
+        currentFilter = null;
+        loadSidebar();
+        return;
+    }
+    document.querySelector(`.rcf-sidebar-filters li:nth-child(${filter}) .filter-btn`).classList.add('filter-active');
+    currentFilter = filter;
+
+    let items = new Array();
+    const defeats = new Array();
+
+    history.forEach((current) => {
+        const loser = getLoser(current, filter === 3);
+        if (!loser) return;
+
+        if (!defeats.some(x => x.name === loser.name)) return defeats.push({ name: loser.name, defeats: 1 });
+        defeats.find(x => x.name === loser.name).defeats += 1;
+    });
+    defeats.sort((a, b) => {
+        if (filter === 1) return b.defeats - a.defeats;
+        if (filter === 2) return a.defeats - b.defeats;
+        return 0;
+    });
+
+    for (let i = defeats.length - 1; i >= 0; i--) {
+        history.forEach((current) => {
+            const loser = getLoser(current, filter === 3);
+            if (loser?.name === defeats[i].name) {
+                items.push(current);
+            }
+        });
+    }
+
+    loadSidebar(items);
+}
+
+function getLoser(listItem, only666 = false) {
+    let min = 20;
+    let loser;
+
+    for (const player of listItem.players) {
+        if (only666) {
+            if (player.total < min && player.total === 3) {
+                min = player.total;
+                loser = player;
+            }
+            continue;
+        }
+        if (player.total < min) {
+            min = player.total;
+            loser = player;
+        }
+    }
+
+    const losers = listItem.players.filter(p => {
+        return p.throws.reduce((acc, crr) => acc + crr, 0) === min;
+    });
+
+    if (losers.length > 1) return null;
+    return loser;
+}
+
+function toggleSidebar(action = 'close') {
+    if (action === 'open') {
+        document.querySelector('.rcf-sidebar ul').scrollTop = 0;
+        document.querySelector('.rcf-sidebar-backdrop').style.display = 'block';
+        document.querySelector('.rcf-sidebar').classList.add('rcf-sidebar-open');
+        document.querySelector(':root').classList.add('rcf-overflow-hidden');
+        document.querySelector('.rcf-sidebar-list').scrollTo(0, 0);
+    }
+    if (action === 'close') {
+        document.querySelector('.rcf-sidebar-backdrop').style.display = 'none';
+        document.querySelector('.rcf-sidebar').classList.remove('rcf-sidebar-open');
+        document.querySelector(':root').classList.remove('rcf-overflow-hidden');
+        document.querySelector('.modal').classList.remove('open');
+        setTimeout(() => {
+            isModalOpen = false;
+        }, 500);
+    }
+}
+
+//#endregion
+
 window.addEventListener('resize', () => setSelectScorePosition());
 
 document.querySelector('#version').innerText = 'v' + root.dataset.version;
@@ -336,8 +566,14 @@ function setTheme(dark) {
     localStorage.setItem('theme', dark ? 'dark' : 'light');
     root.style = `color-scheme:${dark ? 'dark' : 'light'}`;
 
-    if (dark) document.querySelector('#change-theme img').src = './images/sun-solid-full.svg';
-    else document.querySelector('#change-theme img').src = './images/moon-solid-full.svg';
+    if (dark) {
+        document.querySelector('#change-theme img').src = './images/sun-solid-full.svg';
+        document.querySelector('#toggle-sidebar-btn img').src = './images/menu-icon-white.svg';
+    }
+    else {
+        document.querySelector('#change-theme img').src = './images/moon-solid-full.svg';
+        document.querySelector('#toggle-sidebar-btn img').src = './images/menu-icon.svg';
+    }
 }
 
 function toggleTheme() {
