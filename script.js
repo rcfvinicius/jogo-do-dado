@@ -2,6 +2,7 @@ document.querySelector('#change-theme').addEventListener('click', toggleTheme);
 document.querySelector('#toggle-sidebar-btn').addEventListener('click', toggleSidebar);
 const root = document.querySelector(':root');
 setTheme(getTheme() === 'dark');
+/** A lista nunca é reordenada. A ordem é sempre a mesma (da partida mais antiga para a mais recente) */
 const history = getHistory();
 const userWins = getUserWinHistory();
 const addInput = document.querySelector('#add-player-row input');
