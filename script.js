@@ -534,13 +534,13 @@ function toggleSidebar(action = 'close') {
         document.querySelector('.rcf-sidebar ul').scrollTop = 0;
         document.querySelector('.rcf-sidebar-backdrop').style.display = 'block';
         document.querySelector('.rcf-sidebar').classList.add('rcf-sidebar-open');
-        document.querySelector(':root').classList.add('rcf-overflow-hidden');
+        root.classList.add('rcf-overflow-hidden');
         document.querySelector('.rcf-sidebar-list').scrollTo(0, 0);
     }
     if (action === 'close') {
         document.querySelector('.rcf-sidebar-backdrop').style.display = 'none';
         document.querySelector('.rcf-sidebar').classList.remove('rcf-sidebar-open');
-        document.querySelector(':root').classList.remove('rcf-overflow-hidden');
+        root.classList.remove('rcf-overflow-hidden');
         document.querySelector('.modal').classList.remove('open');
         setTimeout(() => {
             isModalOpen = false;
